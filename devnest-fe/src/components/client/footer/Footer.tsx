@@ -28,7 +28,7 @@ export function Footer() {
                                 <BookOpenIcon className="w-5 h-5 text-white" />
                             </div>
                             <span className="font-bold text-xl text-white">
-                                Edu<span className="text-primary-400">Viet</span>
+                                Dev<span className="text-primary-400">Nest</span>
                             </span>
                         </Link>
                         <p className="text-sm text-gray-400 leading-relaxed mb-4">
@@ -86,7 +86,7 @@ export function Footer() {
 
                     {/* Công ty */}
                     <div>
-                        <h3 className="font-semibold text-white mb-4">EduViet</h3>
+                        <h3 className="font-semibold text-white mb-4">DevNest</h3>
                         <ul className="space-y-2.5">
                             {[
                                 {
@@ -176,7 +176,7 @@ export function Footer() {
                 {/* Bottom */}
                 <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-gray-500">
-                        © 2024 EduViet. Tất cả quyền được bảo lưu.
+                        © 2024 DevNest. Tất cả quyền được bảo lưu.
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                         <span>🇻🇳 Tiếng Việt</span>

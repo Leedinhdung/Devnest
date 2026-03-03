@@ -32,11 +32,11 @@ const faqs = [
     },
     {
         q: 'Tôi có thể học trên điện thoại di động không?',
-        a: 'Có! EduViet hỗ trợ học trên tất cả các thiết bị bao gồm điện thoại iOS, Android, máy tính bảng và máy tính. Bạn có thể học mọi lúc, mọi nơi.',
+        a: 'Có! DevNest hỗ trợ học trên tất cả các thiết bị bao gồm điện thoại iOS, Android, máy tính bảng và máy tính. Bạn có thể học mọi lúc, mọi nơi.',
     },
     {
         q: 'Chứng chỉ hoàn thành có giá trị không?',
-        a: 'Chứng chỉ của EduViet được nhiều doanh nghiệp hàng đầu Việt Nam công nhận. Bạn có thể thêm chứng chỉ vào hồ sơ LinkedIn và CV của mình.',
+        a: 'Chứng chỉ của DevNest được nhiều doanh nghiệp hàng đầu Việt Nam công nhận. Bạn có thể thêm chứng chỉ vào hồ sơ LinkedIn và CV của mình.',
     },
 ]
 export function ContactPage() {
@@ -414,7 +414,7 @@ export function ContactPage() {
                                     {
                                         icon: MailIcon,
                                         label: 'Email',
-                                        value: 'support@eduviet.vn',
+                                        value: 'support@DevNest.vn',
                                         color: 'text-blue-500 bg-blue-50',
                                     },
                                     {

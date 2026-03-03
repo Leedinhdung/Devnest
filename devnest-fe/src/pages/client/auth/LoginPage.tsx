@@ -118,7 +118,7 @@ export function LoginPage() {
                         <span className="text-accent-400">phát triển không ngừng</span>
                     </h2>
                     <p className="text-white/70 text-lg mb-8">
-                        Tham gia cùng 150,000+ học viên đang học tập trên EduViet
+                        Tham gia cùng 150,000+ học viên đang học tập trên DevNest
                     </p>
 
                     <div className="space-y-3">
@@ -198,7 +198,7 @@ export function LoginPage() {
                                         {mode === 'forgot' && 'Quên mật khẩu'}
                                     </h1>
                                     <p className="text-gray-500 text-sm mt-1">
-                                        {mode === 'login' && 'Chào mừng bạn quay lại EduViet!'}
+                                        {mode === 'login' && 'Chào mừng bạn quay lại DevNest!'}
                                         {mode === 'register' &&
                                             'Bắt đầu hành trình học tập của bạn'}
                                         {mode === 'forgot' &&
