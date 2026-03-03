@@ -112,7 +112,7 @@ export function LearnPage() {
                             <BookOpenIcon className="w-4 h-4 text-white" />
                         </div>
                         <span className="font-bold text-white hidden sm:block text-sm">
-                            EduViet
+                            DevNest
                         </span>
                     </Link>
                     <span className="text-gray-600 hidden md:block">·</span>

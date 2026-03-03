@@ -7,7 +7,8 @@ import { CoursesPage } from "@/pages/admin/courses/CoursesPage";
 import { DashboardPage } from "@/pages/admin/Dashboard";
 import { SettingsPage } from "@/pages/admin/settings/SettingsPage";
 import { StudentsPage } from "@/pages/admin/students/StudentsPage";
-import { HomePage } from "@/pages/client/home/HomePage";
+import HomePage from "@/pages/client/home/HomePage";
+
 import { ProfilePage } from "@/pages/client/profile/ProfilePage";
 import routes from "@/routes/routes";
 

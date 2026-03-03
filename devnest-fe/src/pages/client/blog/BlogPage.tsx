@@ -81,7 +81,7 @@ export function BlogPage() {
               📝 Blog & Kiến thức
             </span>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-              Blog EduViet
+              Blog DevNest
             </h1>
             <p className="text-gray-500 max-w-xl mx-auto mb-7 text-lg">
               Kiến thức, kinh nghiệm và xu hướng mới nhất từ các chuyên gia hàng
