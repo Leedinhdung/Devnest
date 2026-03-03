@@ -7,5 +7,8 @@ const routes = {
 	courses: "/quan-tri/khoa-hoc",
 	students: "/quan-tri/hoc-vien",
 	settings: "/quan-tri/cai-dat",
+	//Client
+	home: "/",
+	profile: "/trang-ca-nhan",
 };
 export default routes;

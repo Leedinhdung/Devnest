@@ -1,6 +1,7 @@
-import { adminRoutes, authRoutes } from '@/constants/routesContant'
+import { adminRoutes, authRoutes, clientRoutes } from '@/constants/routesContant'
 import { AdminLayout } from '@/layouts/admin/AdminLayout'
 import AuthLayout from '@/layouts/admin/AuthLayout'
+import ClientLayout from '@/layouts/client/ClientLayout'
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
@@ -18,9 +19,18 @@ const App = () => {
               } />
             ))
           }
-
-        </Routes>
-        <Routes>
+        {clientRoutes.map((route, index) => (
+          <Route
+            key={index}
+            path={route.path}
+            element={
+              <ClientLayout>
+                <route.element />
+              </ClientLayout>
+            }
+          />
+        ))}
+        
           {
             adminRoutes.map((route, index) => (
               <Route key={index} path={route.path} element={
