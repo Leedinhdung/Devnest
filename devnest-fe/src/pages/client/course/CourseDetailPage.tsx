@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
     PlayCircleIcon,
@@ -24,15 +24,19 @@ import {
     SmartphoneIcon,
     ThumbsUpIcon,
 } from 'lucide-react'
+
+import { toast } from 'sonner'
+import { useCart } from '@/context/CartContext'
 import { courses, formatPrice } from '@/data/mockData'
-import { StarRating } from '@/components/client/rating/StarRating'
 import { CategoryBadge } from '@/components/client/category/CategoryBadge'
+import { StarRating } from '@/components/client/rating/StarRating'
 import { CourseCard } from '@/components/client/course/CourseCard'
-import routes from '@/routes/routes'
 export function CourseDetailPage() {
     const { id } = useParams<{
         id: string
     }>()
+    const navigate = useNavigate()
+    const { addToCart, isInCart } = useCart()
     const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
         new Set(['c1']),
     )
@@ -57,6 +61,22 @@ export function CourseDetailPage() {
             else next.add(chapterId)
             return next
         })
+    }
+    const handleBuyNow = () => {
+        navigate(`/mua-khoa-hoc/${course.id}`)
+    }
+    const handleAddToCart = () => {
+        if (!isInCart(course.id)) {
+            addToCart(course)
+            toast.success('Đã thêm vào giỏ hàng', {
+                action: {
+                    label: 'Xem giỏ hàng',
+                    onClick: () => navigate('/gio-hang'),
+                },
+            })
+        } else {
+            navigate('/gio-hang')
+        }
     }
     const tabs = [
         {
@@ -190,9 +210,12 @@ export function CourseDetailPage() {
                         Tiếp tục học
                     </Link>
                 ) : (
-                    <Link to={routes.buyCourse.replace(':id', course.id)} className="bg-accent-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-accent-600 transition-colors">
+                    <button
+                        onClick={handleBuyNow}
+                        className="bg-accent-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-accent-600 transition-colors"
+                    >
                         Mua ngay
-                    </Link>
+                    </button>
                 )}
             </div>
 
@@ -691,12 +714,20 @@ export function CourseDetailPage() {
                                         </Link>
                                     ) : (
                                         <>
-                                            <Link to={routes.buyCourse.replace(":id", course.id)} className="w-full flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold py-3.5 rounded-xl transition-colors mb-3 text-base">
+                                            <button
+                                                onClick={handleBuyNow}
+                                                className="w-full flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold py-3.5 rounded-xl transition-colors mb-3 text-base"
+                                            >
                                                 <ShoppingCartIcon className="w-5 h-5" />
                                                 Mua ngay
-                                            </Link>
-                                            <button className="w-full flex items-center justify-center gap-2 bg-white border-2 border-primary-600 text-primary-600 font-bold py-3 rounded-xl hover:bg-primary-50 transition-colors mb-3">
-                                                Thêm vào giỏ hàng
+                                            </button>
+                                            <button
+                                                onClick={handleAddToCart}
+                                                className="w-full flex items-center justify-center gap-2 bg-white border-2 border-primary-600 text-primary-600 font-bold py-3 rounded-xl hover:bg-primary-50 transition-colors mb-3"
+                                            >
+                                                {isInCart(course.id)
+                                                    ? 'Đến giỏ hàng'
+                                                    : 'Thêm vào giỏ hàng'}
                                             </button>
                                         </>
                                     )}
