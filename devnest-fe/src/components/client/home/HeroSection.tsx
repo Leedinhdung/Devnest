@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRightIcon, CheckCircleIcon, PlayCircleIcon, StarIcon, TrendingUpIcon } from 'lucide-react'
+import routes from '@/routes/routes'
 const HeroSection = () => {
     return (
         <section className="hero-gradient min-h-[600px] flex items-center relative overflow-hidden">
@@ -47,7 +48,7 @@ const HeroSection = () => {
 
                         <div className="flex flex-col sm:flex-row gap-4 mb-10">
                             <Link
-                                to="/courses"
+                                to={routes.coursesList}
                                 className="inline-flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-accent-500/30 hover:-translate-y-0.5"
                             >
                                 Khám phá khóa học

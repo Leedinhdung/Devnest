@@ -9,19 +9,9 @@ import {
     ArrowRightIcon,
     GithubIcon,
 } from 'lucide-react'
+import { FormErrors, FormState } from '@/types/auth'
 type Mode = 'login' | 'register' | 'forgot'
-interface FormState {
-    name: string
-    email: string
-    password: string
-    confirmPassword: string
-}
-interface FormErrors {
-    name?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-}
+
 export function LoginPage() {
     const [mode, setMode] = useState<Mode>('login')
     const [showPassword, setShowPassword] = useState(false)
@@ -96,7 +86,7 @@ export function LoginPage() {
     return (
         <div className="min-h-screen w-full flex">
             {/* Left panel - decorative */}
-            <div className="hidden lg:flex lg:w-1/2 hero-gradient flex-col justify-between p-12 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 hero-gradient rounded-3xl flex-col justify-between p-12 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl" />
                     <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl" />
@@ -107,7 +97,7 @@ export function LoginPage() {
                         <BookOpenIcon className="w-5 h-5 text-white" />
                     </div>
                     <span className="font-bold text-xl text-white">
-                        Edu<span className="text-accent-400">Viet</span>
+                        Dev<span className="text-accent-400">Nest</span>
                     </span>
                 </Link>
 
