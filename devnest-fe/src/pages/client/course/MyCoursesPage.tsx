@@ -1,20 +1,20 @@
-import React, { useState, Children } from 'react'
-import { Link } from 'react-router-dom'
+import { CategoryBadge } from '@/components/client/category/CategoryBadge'
+import { ProgressBar } from '@/components/client/progressbar/ProgressBar'
+import { StarRating } from '@/components/client/rating/StarRating'
+import { courses } from '@/data/mockData'
 import { motion } from 'framer-motion'
 import {
-    PlayCircleIcon,
-    SearchIcon,
+    AwardIcon,
     BookOpenIcon,
     CheckCircleIcon,
     ClockIcon,
-    AwardIcon,
+    PlayCircleIcon,
+    SearchIcon,
     TrendingUpIcon,
     XIcon,
 } from 'lucide-react'
-import { courses } from '@/data/mockData'
-import { ProgressBar } from '@/components/client/progressbar/ProgressBar'
-import { StarRating } from '@/components/client/rating/StarRating'
-import { CategoryBadge } from '@/components/client/category/CategoryBadge'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const filterOptions = ['Tất cả', 'Đang học', 'Hoàn thành', 'Chưa bắt đầu']
 const containerVariants = {
@@ -71,9 +71,6 @@ export function MyCoursesPage() {
     ).length
     const inProgressCount = purchasedCourses.filter(
         (c) => (c.progress || 0) > 0 && (c.progress || 0) < 100,
-    ).length
-    const notStartedCount = purchasedCourses.filter(
-        (c) => (c.progress || 0) === 0,
     ).length
     return (
         <main className="w-full min-h-screen bg-gray-50 pt-16">
