@@ -22,7 +22,7 @@ const HomePage = () => {
             <StatsSection />
 
             {/* Categories */}
-            <CategorySection />
+            {/* <CategorySection /> */}
 
             {/* Bestseller Courses */}
 

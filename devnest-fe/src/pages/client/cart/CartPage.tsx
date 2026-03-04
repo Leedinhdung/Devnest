@@ -11,39 +11,11 @@ import {
     CheckIcon,
     ChevronRightIcon,
 } from 'lucide-react'
-import { Navbar } from '@/components/client/navbar/Navbar'
-import { Footer } from '@/components/client/footer/Footer'
-import { useCart } from '@/context/CartContext'
+import routes from '@/routes/routes'
 
-function formatPrice(price: number): string {
-    return price.toLocaleString('vi-VN') + 'đ'
-}
-const DISCOUNT_RATE = 0.1
 export function CartPage() {
-    const { items, removeFromCart, totalPrice } = useCart()
-    const [coupon, setCoupon] = useState('')
-    const [couponApplied, setCouponApplied] = useState(false)
-    const [couponError, setCouponError] = useState('')
-    const navigate = useNavigate()
-    const originalTotal = items.reduce(
-        (sum, item) => sum + item.course.originalPrice * item.quantity,
-        0,
-    )
-    const discount = couponApplied ? Math.round(totalPrice * DISCOUNT_RATE) : 0
-    const finalTotal = totalPrice - discount
-    const handleApplyCoupon = () => {
-        if (coupon.trim().toUpperCase() === 'HOCNHANH') {
-            setCouponApplied(true)
-            setCouponError('')
-        } else {
-            setCouponApplied(false)
-            setCouponError('Mã giảm giá không hợp lệ')
-        }
-    }
+    
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Navbar />
-
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
                 {/* Progress Steps */}
                 <div className="flex items-center justify-center mb-10">
@@ -77,15 +49,15 @@ export function CartPage() {
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900">
                         Giỏ hàng của bạn
-                        {items.length > 0 && (
+                        {/* {items.length > 0 && (
                             <span className="ml-2 text-lg font-normal text-gray-500">
                                 ({items.length} khóa học)
                             </span>
-                        )}
+                        )} */}
                     </h1>
                 </div>
 
-                {items.length === 0 /* Empty State */ ? (
+                {/* {items.length === 0  ? ( */}
                     <div className="flex flex-col items-center justify-center py-24 text-center">
                         <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
                             <ShoppingCartIcon className="w-12 h-12 text-blue-400" />
@@ -98,17 +70,17 @@ export function CartPage() {
                             học chất lượng cao!
                         </p>
                         <Link
-                            to="/courses"
+                            to={routes.coursesList}
                             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
                         >
                             <BookOpenIcon className="w-5 h-5" />
                             Khám phá khóa học
                         </Link>
                     </div>
-                ) : (
+                {/* ) : ( */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Cart Items */}
-                        <div className="lg:col-span-2 space-y-4">
+                        {/* <div className="lg:col-span-2 space-y-4">
                             {items.map((item) => (
                                 <div
                                     key={item.course.id}
@@ -165,7 +137,7 @@ export function CartPage() {
                             >
                                 ← Tiếp tục mua sắm
                             </Link>
-                        </div>
+                        </div> */}
 
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
@@ -174,7 +146,7 @@ export function CartPage() {
                                     Tóm tắt đơn hàng
                                 </h2>
 
-                                <div className="space-y-3 mb-5">
+                                {/* <div className="space-y-3 mb-5">
                                     <div className="flex justify-between text-sm text-gray-600">
                                         <span>Tạm tính</span>
                                         <span>{formatPrice(totalPrice)}</span>
@@ -197,10 +169,10 @@ export function CartPage() {
                                             {formatPrice(finalTotal)}
                                         </span>
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Coupon */}
-                                <div className="mb-5">
+                                {/* <div className="mb-5">
                                     <label className="text-xs font-medium text-gray-600 mb-1.5 block flex items-center gap-1">
                                         <TagIcon className="w-3.5 h-3.5" />
                                         Mã giảm giá
@@ -233,17 +205,17 @@ export function CartPage() {
                                         </p>
                                     )}
                                     <p className="text-xs text-gray-400 mt-1">Thử: HOCNHANH</p>
-                                </div>
+                                </div> */}
 
-                                <button
+                                {/* <button
                                     onClick={() => navigate('/checkout')}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                                 >
                                     Tiến hành thanh toán
                                     <ArrowRightIcon className="w-4 h-4" />
-                                </button>
+                                </button> */}
 
-                                <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-400">
+                                {/* <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-400">
                                     <span className="flex items-center gap-1">
                                         <CheckIcon className="w-3 h-3 text-green-500" />
                                         Bảo mật SSL
@@ -252,14 +224,11 @@ export function CartPage() {
                                         <CheckIcon className="w-3 h-3 text-green-500" />
                                         Hoàn tiền 30 ngày
                                     </span>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
-                )}
+                {/* )} */}
             </main>
-
-            <Footer />
-        </div>
     )
 }

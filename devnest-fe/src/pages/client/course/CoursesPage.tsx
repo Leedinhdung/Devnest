@@ -160,7 +160,7 @@ export function CoursesPage() {
                         >
                             <SlidersHorizontalIcon className="w-4 h-4" />
                             Bộ lọc
-                        </button>
+                         </button>
 
                         <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden">
                             <button

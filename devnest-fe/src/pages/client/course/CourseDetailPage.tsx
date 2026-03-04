@@ -28,6 +28,7 @@ import { courses, formatPrice } from '@/data/mockData'
 import { StarRating } from '@/components/client/rating/StarRating'
 import { CategoryBadge } from '@/components/client/category/CategoryBadge'
 import { CourseCard } from '@/components/client/course/CourseCard'
+import routes from '@/routes/routes'
 export function CourseDetailPage() {
     const { id } = useParams<{
         id: string
@@ -189,9 +190,9 @@ export function CourseDetailPage() {
                         Tiếp tục học
                     </Link>
                 ) : (
-                    <button className="bg-accent-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-accent-600 transition-colors">
+                    <Link to={routes.buyCourse.replace(':id', course.id)} className="bg-accent-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-accent-600 transition-colors">
                         Mua ngay
-                    </button>
+                    </Link>
                 )}
             </div>
 
@@ -690,10 +691,10 @@ export function CourseDetailPage() {
                                         </Link>
                                     ) : (
                                         <>
-                                            <button className="w-full flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold py-3.5 rounded-xl transition-colors mb-3 text-base">
+                                            <Link to={routes.buyCourse.replace(":id", course.id)} className="w-full flex items-center justify-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold py-3.5 rounded-xl transition-colors mb-3 text-base">
                                                 <ShoppingCartIcon className="w-5 h-5" />
                                                 Mua ngay
-                                            </button>
+                                            </Link>
                                             <button className="w-full flex items-center justify-center gap-2 bg-white border-2 border-primary-600 text-primary-600 font-bold py-3 rounded-xl hover:bg-primary-50 transition-colors mb-3">
                                                 Thêm vào giỏ hàng
                                             </button>

@@ -154,10 +154,7 @@ export function SearchResultsPage() {
         setSearchInput(query)
     }, [query])
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Navbar />
-
-            {/* Search Header */}
+        <div className="min-h-screen bg-gray-50 flex flex-col mt-16">
             <div className="bg-white border-b border-gray-200 py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl">
@@ -209,7 +206,6 @@ export function SearchResultsPage() {
                     )}
                 </div>
             </div>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
                 <div className="flex gap-8">
                     {/* Sidebar Filters - Desktop */}
@@ -451,8 +447,6 @@ export function SearchResultsPage() {
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     )
 }
