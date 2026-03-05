@@ -75,7 +75,6 @@ export function LoginPage() {
     return () => clearInterval(timer)
   }, [resendTimer])
   const onSubmit = async (data: AuthFormType) => {
-    console.log(data)
     if (mode === 'register') {
       registerMutation.mutate({
         fullname: data.fullname!,

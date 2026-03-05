@@ -18,14 +18,9 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Modal } from '@/components/ui/modal'
 import { CategoryModal } from '@/pages/admin/courses/CategoryModal'
+import { useGetCategories } from '@/hooks/category/category'
+import CourseForm from '@/components/admin/course/CourseForm'
 
-interface Category {
-    id: number
-    name: string
-    description: string
-    color: string
-    courseCount: number
-}
 interface Course {
     id: number
     name: string
@@ -41,36 +36,7 @@ interface Course {
     createdAt: string
     revenue: string
 }
-const initialCategories: Category[] = [
-    {
-        id: 1,
-        name: 'Lập trình',
-        description: 'Các khóa học về lập trình và phát triển phần mềm',
-        color: 'indigo',
-        courseCount: 4,
-    },
-    {
-        id: 2,
-        name: 'Thiết kế',
-        description: 'UI/UX, Graphic Design và các khóa thiết kế',
-        color: 'purple',
-        courseCount: 2,
-    },
-    {
-        id: 3,
-        name: 'Marketing',
-        description: 'Digital Marketing, SEO, Content',
-        color: 'cyan',
-        courseCount: 2,
-    },
-    {
-        id: 4,
-        name: 'Kinh doanh',
-        description: 'Kinh doanh online và quản lý',
-        color: 'emerald',
-        courseCount: 1,
-    },
-]
+
 const initialCourses: Course[] = [
     {
         id: 1,
@@ -249,7 +215,7 @@ interface CoursesPageProps {
 }
 export function CoursesPage({ onManageContent }: CoursesPageProps) {
     const [courses, setCourses] = useState<Course[]>(initialCourses)
-    const [categories, setCategories] = useState<Category[]>(initialCategories)
+    const { data: categories = [] } = useGetCategories()
     const [search, setSearch] = useState('')
     const [filterStatus, setFilterStatus] = useState<
         'all' | 'active' | 'draft' | 'archived'
@@ -345,170 +311,12 @@ export function CoursesPage({ onManageContent }: CoursesPageProps) {
             )
         setIsEditModalOpen(false)
     }
-    const handleAddCategory = (cat: Omit<Category, 'id' | 'courseCount'>) => {
-        setCategories((prev) => [
-            ...prev,
-            {
-                ...cat,
-                id: Date.now(),
-                courseCount: 0,
-            },
-        ])
-    }
-    const handleEditCategory = (
-        id: number,
-        cat: Omit<Category, 'id' | 'courseCount'>,
-    ) => {
-        setCategories((prev) =>
-            prev.map((c) =>
-                c.id === id
-                    ? {
-                        ...c,
-                        ...cat,
-                    }
-                    : c,
-            ),
-        )
-    }
-    const handleDeleteCategory = (id: number) => {
-        setCategories((prev) => prev.filter((c) => c.id !== id))
-    }
     const statusBadge = (status: Course['status']) => {
         if (status === 'active') return <Badge variant="success">Đang mở</Badge>
         if (status === 'draft') return <Badge variant="warning">Nháp</Badge>
         return <Badge variant="neutral">Lưu trữ</Badge>
     }
-    const CourseForm = () => (
-        <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Tên khóa học <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            name: e.target.value,
-                        })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Nhập tên khóa học..."
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Giảng viên <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    value={formData.instructor}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            instructor: e.target.value,
-                        })
-                    }
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Tên giảng viên..."
-                />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Danh mục
-                    </label>
-                    <select
-                        value={formData.category}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                category: e.target.value,
-                            })
-                        }
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                    >
-                        {categories.map((cat) => (
-                            <option key={cat.id}>{cat.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Trạng thái
-                    </label>
-                    <select
-                        value={formData.status}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                status: e.target.value as Course['status'],
-                            })
-                        }
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                    >
-                        <option value="active">Đang mở</option>
-                        <option value="draft">Nháp</option>
-                        <option value="archived">Lưu trữ</option>
-                    </select>
-                </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Học phí
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.price}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                price: e.target.value,
-                            })
-                        }
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="VD: 1.200.000đ"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Thời lượng
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.duration}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                duration: e.target.value,
-                            })
-                        }
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="VD: 32h"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                        Số bài học
-                    </label>
-                    <input
-                        type="number"
-                        value={formData.lessons}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                lessons: e.target.value,
-                            })
-                        }
-                        className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="85"
-                    />
-                </div>
-            </div>
-        </div>
-    )
+
     return (
         <div className="space-y-5">
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
@@ -549,8 +357,8 @@ export function CoursesPage({ onManageContent }: CoursesPageProps) {
                             className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 bg-white outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="all">Tất cả danh mục</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id}>{cat.name}</option>
+                            {categories && categories.map((cat) => (
+                                <option key={cat.slug}>{cat.name}</option>
                             ))}
                         </select>
                     </div>
@@ -764,7 +572,7 @@ export function CoursesPage({ onManageContent }: CoursesPageProps) {
                     </>
                 }
             >
-                <CourseForm />
+                <CourseForm categories={categories} />
             </Modal>
 
             <Modal
@@ -789,7 +597,7 @@ export function CoursesPage({ onManageContent }: CoursesPageProps) {
                     </>
                 }
             >
-                <CourseForm />
+                <CourseForm categories={categories} />
             </Modal>
 
             {selectedCourse && (
@@ -910,9 +718,6 @@ export function CoursesPage({ onManageContent }: CoursesPageProps) {
                 isOpen={isCategoryModalOpen}
                 onClose={() => setIsCategoryModalOpen(false)}
                 categories={categories}
-                onAddCategory={handleAddCategory}
-                onEditCategory={handleEditCategory}
-                onDeleteCategory={handleDeleteCategory}
             />
         </div>
     )

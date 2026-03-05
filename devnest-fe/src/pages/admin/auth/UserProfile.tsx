@@ -96,7 +96,7 @@ export function UserProfileModal({
         .join('')
         .slice(0, 2)
         .toUpperCase()
-    console.log(user)
+
     return (
         <>
             {/* Backdrop */}

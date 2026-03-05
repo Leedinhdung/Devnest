@@ -25,6 +25,7 @@ export const authRoutes = [
 export const adminRoutes = [
 	{ path: routes.dashboard, layout: AdminLayout, element: DashboardPage },
 	{ path: routes.courses, layout: AdminLayout, element: CoursesPage },
+	{ path: routes.addCategory, layout: AdminLayout, element: CoursesPage },
 	{ path: routes.students, layout: AdminLayout, element: StudentsPage },
 	{ path: routes.settings, layout: AdminLayout, element: SettingsPage },
 ];
