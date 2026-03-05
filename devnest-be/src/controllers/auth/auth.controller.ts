@@ -11,7 +11,25 @@ export const register = async (req: Request, res: Response) => {
 	const { fullname, email, password } = req.body;
 	const exist = await userModel.findOne({ email });
 	if (exist) {
-		return res.status(400).json({ message: "Email already exists" });
+		// Nếu đã verify → chặn
+		if (exist.isVerified) {
+			return res.status(400).json({
+				message: "Email đã được sử dụng",
+			});
+		}
+
+		// Nếu chưa verify → tạo OTP mới
+		const otp = generateOTP();
+
+		exist.otp = await bcrypt.hash(otp, 10);
+		exist.otpExpire = new Date(Date.now() + 5 * 60 * 1000);
+
+		await exist.save();
+		await sendOTPEmail(email, otp);
+
+		return res.status(200).json({
+			message: "OTP đã được gửi lại",
+		});
 	}
 	const hashPassword = await bcrypt.hash(password, 10);
 	const otp = generateOTP();
@@ -21,6 +39,7 @@ export const register = async (req: Request, res: Response) => {
 		password: hashPassword,
 		otp: await bcrypt.hash(otp, 10),
 		otpExpire: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+		isVerified: false,
 	});
 	await sendOTPEmail(email, otp);
 	return res.status(201).json({ message: "User created successfully", user });
@@ -115,6 +134,48 @@ export const refresh = async (req: Request, res: Response) => {
 	res.json({ accessToken: newAccessToken });
 };
 export const logout = async (req: Request, res: Response) => {
-	res.clearCookie("refreshToken");
-	res.json({ message: "Logged out successfully" });
+	try {
+		const token = req.cookies.refreshToken;
+		if (token) {
+			const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as {
+				userId: string;
+			};
+			const user = await userModel.findById(decoded.userId);
+			if (user) {
+				user.refreshToken = undefined;
+				await user.save();
+			}
+		}
+		res.clearCookie("refreshToken", {
+			httpOnly: true,
+			secure: false,
+			sameSite: "strict",
+		});
+
+		res.json({ message: "Logged out successfully" });
+	} catch (err) {
+		res.status(500).json({ message: "Logout failed" });
+	}
+};
+export const getMe = async (req: Request, res: Response) => {
+	try {
+		const userId = (req as any).user.userId;
+
+		const user = await userModel
+			.findById(userId)
+			.select("-password -refreshToken -otp -otpExpire");
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		res.json({
+			id: user._id,
+			name: user.fullname,
+			email: user.email,
+			role: user.role,
+		});
+	} catch (error) {
+		res.status(500).json({ message: "Server error" });
+	}
 };
