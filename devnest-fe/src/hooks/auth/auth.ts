@@ -1,5 +1,6 @@
 import { authApi } from "@/api/services/auth.service";
-import { IUser } from "@/types/auth.type";
+import { useAuth } from "@/context/AuthContext";
+import { LoginPayload, RegisterPayload } from "@/types/auth.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useRegister = (options?: {
@@ -8,7 +9,7 @@ export const useRegister = (options?: {
 }) => {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: async (data: IUser) => {
+		mutationFn: async (data: RegisterPayload) => {
 			return authApi.register(data);
 		},
 		onSuccess: () => {
@@ -43,16 +44,27 @@ export const useLogin = (options?: {
 	onError?: (error: any) => void;
 }) => {
 	const queryClient = useQueryClient();
+	const { login } = useAuth();
 	return useMutation({
-		mutationFn: async (data: { email: string; password: string }) => {
+		mutationFn: async (data: LoginPayload) => {
 			return authApi.login(data);
 		},
-		onSuccess: () => {
+		onSuccess: (res) => {
+			login(res.accessToken, res.user);
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			options?.onSuccess?.();
 		},
 		onError: (error) => {
 			options?.onError?.(error);
+		},
+	});
+};
+export const useLogout = () => {
+	const { logout } = useAuth();
+	return useMutation({
+		mutationFn: authApi.logout,
+		onSuccess: () => {
+			logout();
 		},
 	});
 };

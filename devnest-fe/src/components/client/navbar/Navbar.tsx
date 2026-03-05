@@ -1,4 +1,6 @@
+import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
+import { useLogout } from '@/hooks/auth/auth'
 import routes from '@/routes/routes'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -36,7 +38,9 @@ export function Navbar() {
     const [isMobileOpen, setIsMobileOpen] = useState(false)
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
-    const [isLoggedIn] = useState(true) // Mock logged in state
+    const { user, isAuthenticated } = useAuth()
+    const logoutMutation = useLogout()
+    const [isLoggedIn] = useState(true)
     const location = useLocation()
     const navigate = useNavigate()
     const { cartCount } = useCart()
@@ -54,6 +58,9 @@ export function Navbar() {
             navigate(`/courses?search=${encodeURIComponent(searchQuery)}`)
         }
     }
+    const handleLogout = () => {
+        logoutMutation.mutate();
+    }
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-nav border-b border-gray-100' : 'bg-white border-b border-gray-100'}`}
@@ -66,7 +73,7 @@ export function Navbar() {
                             <BookOpenIcon className="w-5 h-5 text-white" />
                         </div>
                         <span className="font-bold text-xl text-gray-900">
-                            Edu<span className="text-primary-600">Viet</span>
+                            Dev<span className="text-primary-600">Nest</span>
                         </span>
                     </Link>
 
@@ -102,7 +109,7 @@ export function Navbar() {
 
                     {/* Right side */}
                     <div className="hidden md:flex items-center gap-2">
-                        {isLoggedIn ? (
+                        {isAuthenticated ? (
                             <>
                                 <Link
                                     to={routes.myCourses}
@@ -166,10 +173,10 @@ export function Navbar() {
                                             >
                                                 <div className="px-4 py-2 border-b border-gray-100 mb-1">
                                                     <p className="font-semibold text-gray-900 text-sm">
-                                                        Nguyễn Thành Long
+                                                        {user?.fullname}
                                                     </p>
                                                     <p className="text-xs text-gray-500">
-                                                        thanh.long@email.com
+                                                        {user?.email}
                                                     </p>
                                                 </div>
                                                 <Link
@@ -194,13 +201,12 @@ export function Navbar() {
                                                     Khóa học yêu thích
                                                 </Link>
                                                 <div className="border-t border-gray-100 mt-1 pt-1">
-                                                    <Link
-                                                        to={routes.login}
+                                                    <button onClick={handleLogout}
                                                         className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                                                     >
                                                         <LogOutIcon className="w-4 h-4" />
                                                         Đăng xuất
-                                                    </Link>
+                                                    </button>
                                                 </div>
                                             </motion.div>
                                         )}
