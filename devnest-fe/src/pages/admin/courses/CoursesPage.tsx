@@ -1,21 +1,31 @@
-import { Badge } from '@/components/ui/badge'
-import { Modal } from '@/components/ui/modal'
+import React, { useState } from 'react'
 import {
-    BookOpenIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    EditIcon,
-    EyeIcon,
-    FilterIcon,
-    MoreVerticalIcon,
     PlusIcon,
     SearchIcon,
-    StarIcon,
+    FilterIcon,
+    EditIcon,
     TrashIcon,
+    EyeIcon,
+    BookOpenIcon,
     UsersIcon,
+    StarIcon,
     VideoIcon,
+    MoreVerticalIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    TagIcon,
 } from 'lucide-react'
-import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Modal } from '@/components/ui/modal'
+import { CategoryModal } from '@/pages/admin/courses/CategoryModal'
+
+interface Category {
+    id: number
+    name: string
+    description: string
+    color: string
+    courseCount: number
+}
 interface Course {
     id: number
     name: string
@@ -31,6 +41,36 @@ interface Course {
     createdAt: string
     revenue: string
 }
+const initialCategories: Category[] = [
+    {
+        id: 1,
+        name: 'Lập trình',
+        description: 'Các khóa học về lập trình và phát triển phần mềm',
+        color: 'indigo',
+        courseCount: 4,
+    },
+    {
+        id: 2,
+        name: 'Thiết kế',
+        description: 'UI/UX, Graphic Design và các khóa thiết kế',
+        color: 'purple',
+        courseCount: 2,
+    },
+    {
+        id: 3,
+        name: 'Marketing',
+        description: 'Digital Marketing, SEO, Content',
+        color: 'cyan',
+        courseCount: 2,
+    },
+    {
+        id: 4,
+        name: 'Kinh doanh',
+        description: 'Kinh doanh online và quản lý',
+        color: 'emerald',
+        courseCount: 1,
+    },
+]
 const initialCourses: Course[] = [
     {
         id: 1,
@@ -204,8 +244,12 @@ const emptyForm: CourseFormData = {
     lessons: '',
     status: 'draft',
 }
-export function CoursesPage() {
+interface CoursesPageProps {
+    onManageContent?: (courseId: number) => void
+}
+export function CoursesPage({ onManageContent }: CoursesPageProps) {
     const [courses, setCourses] = useState<Course[]>(initialCourses)
+    const [categories, setCategories] = useState<Category[]>(initialCategories)
     const [search, setSearch] = useState('')
     const [filterStatus, setFilterStatus] = useState<
         'all' | 'active' | 'draft' | 'archived'
@@ -216,6 +260,7 @@ export function CoursesPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
     const [formData, setFormData] = useState<CourseFormData>(emptyForm)
     const [openMenuId, setOpenMenuId] = useState<number | null>(null)
@@ -262,9 +307,8 @@ export function CoursesPage() {
         setOpenMenuId(null)
     }
     const handleDelete = () => {
-        if (selectedCourse) {
+        if (selectedCourse)
             setCourses((prev) => prev.filter((c) => c.id !== selectedCourse.id))
-        }
         setIsDeleteModalOpen(false)
     }
     const handleSaveAdd = () => {
@@ -287,7 +331,7 @@ export function CoursesPage() {
         setIsAddModalOpen(false)
     }
     const handleSaveEdit = () => {
-        if (selectedCourse) {
+        if (selectedCourse)
             setCourses((prev) =>
                 prev.map((c) =>
                     c.id === selectedCourse.id
@@ -299,8 +343,35 @@ export function CoursesPage() {
                         : c,
                 ),
             )
-        }
         setIsEditModalOpen(false)
+    }
+    const handleAddCategory = (cat: Omit<Category, 'id' | 'courseCount'>) => {
+        setCategories((prev) => [
+            ...prev,
+            {
+                ...cat,
+                id: Date.now(),
+                courseCount: 0,
+            },
+        ])
+    }
+    const handleEditCategory = (
+        id: number,
+        cat: Omit<Category, 'id' | 'courseCount'>,
+    ) => {
+        setCategories((prev) =>
+            prev.map((c) =>
+                c.id === id
+                    ? {
+                        ...c,
+                        ...cat,
+                    }
+                    : c,
+            ),
+        )
+    }
+    const handleDeleteCategory = (id: number) => {
+        setCategories((prev) => prev.filter((c) => c.id !== id))
     }
     const statusBadge = (status: Course['status']) => {
         if (status === 'active') return <Badge variant="success">Đang mở</Badge>
@@ -358,10 +429,9 @@ export function CoursesPage() {
                         }
                         className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                     >
-                        <option>Lập trình</option>
-                        <option>Thiết kế</option>
-                        <option>Marketing</option>
-                        <option>Kinh doanh</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id}>{cat.name}</option>
+                        ))}
                     </select>
                 </div>
                 <div>
@@ -441,10 +511,8 @@ export function CoursesPage() {
     )
     return (
         <div className="space-y-5">
-            {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                 <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
-                    {/* Search */}
                     <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2.5 flex-1 max-w-xs">
                         <SearchIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
                         <input
@@ -458,7 +526,6 @@ export function CoursesPage() {
                             className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-full"
                         />
                     </div>
-                    {/* Filters */}
                     <div className="flex gap-2">
                         <select
                             value={filterStatus}
@@ -482,23 +549,28 @@ export function CoursesPage() {
                             className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-600 bg-white outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="all">Tất cả danh mục</option>
-                            <option>Lập trình</option>
-                            <option>Thiết kế</option>
-                            <option>Marketing</option>
-                            <option>Kinh doanh</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id}>{cat.name}</option>
+                            ))}
                         </select>
                     </div>
                 </div>
-                <button
-                    onClick={handleAdd}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm shadow-indigo-200 flex-shrink-0"
-                >
-                    <PlusIcon className="w-4 h-4" />
-                    Thêm khóa học
-                </button>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                        onClick={() => setIsCategoryModalOpen(true)}
+                        className="flex items-center gap-2 border border-slate-200 hover:bg-slate-50 text-slate-600 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                    >
+                        <TagIcon className="w-4 h-4" /> Danh mục
+                    </button>
+                    <button
+                        onClick={handleAdd}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm shadow-indigo-200"
+                    >
+                        <PlusIcon className="w-4 h-4" /> Thêm khóa học
+                    </button>
+                </div>
             </div>
 
-            {/* Summary */}
             <div className="flex items-center gap-2 text-sm text-slate-500">
                 <FilterIcon className="w-4 h-4" />
                 <span>
@@ -510,14 +582,12 @@ export function CoursesPage() {
                 </span>
             </div>
 
-            {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {paginated.map((course) => (
                     <div
                         key={course.id}
                         className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                     >
-                        {/* Card Header */}
                         <div
                             className={`h-28 bg-gradient-to-br ${thumbnailColors[course.thumbnail] || 'from-slate-500 to-slate-700'} flex items-center justify-center relative`}
                         >
@@ -534,7 +604,6 @@ export function CoursesPage() {
                             <div className="absolute top-3 right-3">
                                 {statusBadge(course.status)}
                             </div>
-                            {/* Menu */}
                             <div className="absolute bottom-3 right-3">
                                 <div className="relative">
                                     <button
@@ -572,8 +641,6 @@ export function CoursesPage() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Card Body */}
                         <div className="p-4">
                             <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-1 line-clamp-2">
                                 {course.name}
@@ -581,7 +648,6 @@ export function CoursesPage() {
                             <p className="text-xs text-slate-500 mb-3">
                                 👨‍🏫 {course.instructor}
                             </p>
-
                             <div className="grid grid-cols-3 gap-2 mb-3">
                                 <div className="text-center">
                                     <p className="text-xs text-slate-400 flex items-center justify-center gap-1 mb-0.5">
@@ -611,7 +677,6 @@ export function CoursesPage() {
                                     <p className="text-xs text-slate-400">Bài học</p>
                                 </div>
                             </div>
-
                             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                                 <div>
                                     <p className="text-xs text-slate-400">Học phí</p>
@@ -626,23 +691,19 @@ export function CoursesPage() {
                                     </p>
                                 </div>
                             </div>
-
-                            {/* Manage Content Button */}
-
-                            <button
-
-                                className="mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold transition-colors"
-                            >
-                                <BookOpenIcon className="w-3.5 h-3.5" />
-                                Quản lý bài học
-                            </button>
-
+                            {onManageContent && (
+                                <button
+                                    onClick={() => onManageContent(course.id)}
+                                    className="mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-semibold transition-colors"
+                                >
+                                    <BookOpenIcon className="w-3.5 h-3.5" /> Quản lý bài học
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-between">
                     <p className="text-sm text-slate-500">
@@ -681,7 +742,6 @@ export function CoursesPage() {
                 </div>
             )}
 
-            {/* Add Modal */}
             <Modal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
@@ -707,7 +767,6 @@ export function CoursesPage() {
                 <CourseForm />
             </Modal>
 
-            {/* Edit Modal */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -733,7 +792,6 @@ export function CoursesPage() {
                 <CourseForm />
             </Modal>
 
-            {/* View Modal */}
             {selectedCourse && (
                 <Modal
                     isOpen={isViewModalOpen}
@@ -758,64 +816,57 @@ export function CoursesPage() {
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Danh mục</p>
-                                <p className="text-sm font-semibold text-slate-700">
-                                    {selectedCourse.category}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Trạng thái</p>
-                                {statusBadge(selectedCourse.status)}
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Học viên</p>
-                                <p className="text-sm font-semibold text-slate-700">
-                                    {selectedCourse.students}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Đánh giá</p>
-                                <p className="text-sm font-semibold text-amber-500">
-                                    ⭐ {selectedCourse.rating}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Học phí</p>
-                                <p className="text-sm font-semibold text-indigo-600">
-                                    {selectedCourse.price}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Doanh thu</p>
-                                <p className="text-sm font-semibold text-emerald-600">
-                                    {selectedCourse.revenue}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Thời lượng</p>
-                                <p className="text-sm font-semibold text-slate-700">
-                                    {selectedCourse.duration}
-                                </p>
-                            </div>
-                            <div className="bg-slate-50 rounded-xl p-3">
-                                <p className="text-xs text-slate-400 mb-1">Số bài học</p>
-                                <p className="text-sm font-semibold text-slate-700">
-                                    {selectedCourse.lessons}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="bg-slate-50 rounded-xl p-3">
-                            <p className="text-xs text-slate-400 mb-1">Ngày tạo</p>
-                            <p className="text-sm font-semibold text-slate-700">
-                                {selectedCourse.createdAt}
-                            </p>
+                            {[
+                                {
+                                    label: 'Danh mục',
+                                    value: selectedCourse.category,
+                                },
+                                {
+                                    label: 'Trạng thái',
+                                    value: statusBadge(selectedCourse.status),
+                                    raw: true,
+                                },
+                                {
+                                    label: 'Học viên',
+                                    value: selectedCourse.students,
+                                },
+                                {
+                                    label: 'Đánh giá',
+                                    value: `⭐ ${selectedCourse.rating}`,
+                                },
+                                {
+                                    label: 'Học phí',
+                                    value: selectedCourse.price,
+                                },
+                                {
+                                    label: 'Doanh thu',
+                                    value: selectedCourse.revenue,
+                                },
+                                {
+                                    label: 'Thời lượng',
+                                    value: selectedCourse.duration,
+                                },
+                                {
+                                    label: 'Số bài học',
+                                    value: selectedCourse.lessons,
+                                },
+                            ].map((item) => (
+                                <div key={item.label} className="bg-slate-50 rounded-xl p-3">
+                                    <p className="text-xs text-slate-400 mb-1">{item.label}</p>
+                                    {item.raw ? (
+                                        item.value
+                                    ) : (
+                                        <p className="text-sm font-semibold text-slate-700">
+                                            {item.value}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </Modal>
             )}
 
-            {/* Delete Confirm Modal */}
             <Modal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -854,6 +905,15 @@ export function CoursesPage() {
                     </p>
                 </div>
             </Modal>
+
+            <CategoryModal
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                categories={categories}
+                onAddCategory={handleAddCategory}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+            />
         </div>
     )
 }

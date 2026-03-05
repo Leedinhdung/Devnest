@@ -6,7 +6,7 @@ import {
 	register,
 	verifyEmail,
 } from "@/controllers/auth/auth.controller.js";
-import { verifyAccessToken } from "@/middlewares/auth.midleware.js";
+import { verifyAccessToken } from "@/middlewares/auth.middleware.js";
 import { validate } from "@/middlewares/validate.js";
 import { loginSchema, registerSchema } from "@/validators/auth.validator.js";
 import express from "express";
