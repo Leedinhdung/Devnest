@@ -111,7 +111,7 @@ export const login = async (req: Request, res: Response) => {
 			accessToken,
 			user: {
 				id: user._id,
-				name: user.fullname,
+				fullname: user.fullname,
 				email: user.email,
 				role: user.role,
 			},
@@ -171,7 +171,7 @@ export const getMe = async (req: Request, res: Response) => {
 
 		res.json({
 			id: user._id,
-			name: user.fullname,
+			fullname: user.fullname,
 			email: user.email,
 			role: user.role,
 		});

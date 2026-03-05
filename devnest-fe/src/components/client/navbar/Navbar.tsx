@@ -12,6 +12,7 @@ import {
     LogOutIcon,
     MenuIcon,
     SearchIcon,
+    ShieldUser,
     ShoppingCartIcon,
     UserIcon,
     XIcon,
@@ -40,7 +41,7 @@ export function Navbar() {
     const [searchQuery, setSearchQuery] = useState('')
     const { user, isAuthenticated } = useAuth()
     const logoutMutation = useLogout()
-    const [isLoggedIn] = useState(true)
+
     const location = useLocation()
     const navigate = useNavigate()
     const { cartCount } = useCart()
@@ -55,7 +56,7 @@ export function Navbar() {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
         if (searchQuery.trim()) {
-            navigate(`/courses?search=${encodeURIComponent(searchQuery)}`)
+            navigate(`/khoa-hoc?search=${encodeURIComponent(searchQuery)}`)
         }
     }
     const handleLogout = () => {
@@ -179,6 +180,13 @@ export function Navbar() {
                                                         {user?.email}
                                                     </p>
                                                 </div>
+                                                {user?.role === 'admin' ? <Link
+                                                    to={routes.dashboard}
+                                                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    <ShieldUser className="w-4 h-4 text-gray-400" />
+                                                    Trang quản trị
+                                                </Link> : null}
                                                 <Link
                                                     to={routes.profile}
                                                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -201,12 +209,12 @@ export function Navbar() {
                                                     Khóa học yêu thích
                                                 </Link>
                                                 <div className="border-t border-gray-100 mt-1 pt-1">
-                                                    <button onClick={handleLogout}
+                                                    <Link to={''} onClick={handleLogout}
                                                         className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                                                     >
                                                         <LogOutIcon className="w-4 h-4" />
                                                         Đăng xuất
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                             </motion.div>
                                         )}
@@ -305,7 +313,7 @@ export function Navbar() {
                                 </Link>
                             ))}
 
-                            {isLoggedIn ? (
+                            {isAuthenticated ? (
                                 <>
                                     <Link
                                         to={routes.myCourses}
@@ -318,6 +326,20 @@ export function Navbar() {
                                         className="block px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
                                     >
                                         Hồ sơ
+                                    </Link>
+                                    {user?.role == 'admin' ? <Link
+                                        to={routes.dashboard}
+                                        onClick={handleLogout}
+                                        className="block px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Trang quản trị
+                                    </Link> : null}
+                                    <Link
+                                        to={''}
+                                        onClick={handleLogout}
+                                        className="block px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Đăng xuất
                                     </Link>
                                 </>
                             ) : (

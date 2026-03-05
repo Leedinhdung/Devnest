@@ -1,32 +1,28 @@
-import React, { useState } from 'react'
-import { MenuIcon, SearchIcon, BellIcon, RefreshCwIcon } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { useAuth } from '@/context/AuthContext'
 import { UserProfileModal } from '@/pages/admin/auth/UserProfile'
+import routes from '@/routes/routes'
+import { IUser } from '@/types/auth.type'
+import { BellIcon, MenuIcon, RefreshCwIcon, SearchIcon } from 'lucide-react'
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
-interface UserInfo {
-    name: string
-    email: string
-    phone?: string
-    role: string
-    avatar: string
-    joinDate: string
-}
 interface HeaderProps {
-    user: UserInfo
+    user: IUser
     onLogout: () => void
     onMenuToggle: () => void
-    onUpdateUser?: (u: Partial<UserInfo>) => void
+    onUpdateUser?: (u: Partial<IUser>) => void
 }
 
-export function Header({ user, onLogout, onMenuToggle, onUpdateUser }: HeaderProps) {
+export function Header({ onLogout, onMenuToggle, onUpdateUser }: HeaderProps) {
     const location = useLocation()
     const [profileOpen, setProfileOpen] = useState(false)
+    const { user } = useAuth()
     // Danh sách route dùng chung (giống Sidebar)
     const navItems = [
-        { label: 'Tổng quan', href: '/quan-tri/tong-quan' },
-        { label: 'Khóa học', href: '/quan-tri/khoa-hoc' },
-        { label: 'Học viên', href: '/quan-tri/hoc-vien' },
-        { label: 'Cài đặt', href: '/quan-tri/cai-dat' },
+        { label: 'Tổng quan', href: routes.dashboard },
+        { label: 'Khóa học', href: routes.courses },
+        { label: 'Học viên', href: routes.students },
+        { label: 'Cài đặt', href: routes.settings },
     ]
 
     const currentNav = navItems.find(
