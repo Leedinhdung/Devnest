@@ -2,6 +2,7 @@ const routes = {
 	//Admin
 	dashboard: "/quan-tri/tong-quan",
 	courses: "/quan-tri/khoa-hoc",
+	addCategory: "/quan-tri/khoa-hoc/danh-muc/:slug",
 	students: "/quan-tri/hoc-vien",
 	settings: "/quan-tri/cai-dat",
 	//Client
