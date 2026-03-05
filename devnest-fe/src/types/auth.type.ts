@@ -1,12 +1,18 @@
 export interface FormState {
-	name: string;
+	fullname: string;
 	email: string;
 	password: string;
 	confirmPassword: string;
 }
 export interface FormErrors {
-	name?: string;
+	fullname?: string;
 	email?: string;
 	password?: string;
 	confirmPassword?: string;
+}
+export interface IUser {
+	id?: string;
+	fullname: string;
+	email: string;
+	password: string;
 }
