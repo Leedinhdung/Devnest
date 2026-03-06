@@ -1,60 +1,16 @@
-import mongoose from "mongoose";
+import {
+	createCourse,
+	deleteCourse,
+	getCourseBySlug,
+	getCourses,
+	updateCourse,
+} from "@/controllers/course/course.controller.js";
+import { Router } from "express";
 
-const courseSchema = new mongoose.Schema({
-	title: {
-		type: String,
-		required: true,
-	},
-	slug: {
-		type: String,
-		unique: true,
-	},
-     description: {
-      type: String,
-    },
-
-    thumbnail: {
-      type: String,
-    },
-
-    price: {
-      type: Number,
-      default: 0,
-    },
-
-    sale_price: {
-      type: Number,
-      default: 0,
-    },
-
-    level: {
-      type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "beginner",
-    },
-
-    category_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-    },
-
-    instructor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-
-    students: {
-      type: Number,
-      default: 0,
-    },
-
-    status: {
-      type: String,
-      enum: ["draft", "published"],
-      default: "draft",
-    },
-  },
-  { timestamps: true }
-);
-
-export default mongoose.model("Course", courseSchema);
+const router = Router();
+router.post("/", createCourse);
+router.get("/", getCourses);
+router.get("/:slug", getCourseBySlug);
+router.put("/:slug", updateCourse);
+router.delete("/:slug", deleteCourse);
+export default router;

@@ -83,10 +83,17 @@ const courseSchema = new mongoose.Schema(
 			enum: ["draft", "published"],
 			default: "draft",
 		},
+		is_deleted: {
+			type: Boolean,
+			default: false,
+		},
+		deleted_at: {
+			type: Date,
+			default: null,
+		},
 	},
 	{
 		timestamps: true,
 	},
 );
-courseSchema.index({ slug: 1 });
 export default mongoose.model("Course", courseSchema);
