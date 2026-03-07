@@ -5,32 +5,25 @@ import {
 	getCoursesService,
 	updateCourseService,
 } from "@/services/course.service.js";
-import { courseSchema } from "@/validators/course.validator.js";
 import { Request, Response } from "express";
 
 export const createCourse = async (req: Request, res: Response) => {
 	try {
-		const validatedData = courseSchema.parse(req.body);
-
-		const course = await createCourseService(validatedData);
-
-		res.json({
+		const course = await createCourseService(req.body);
+		res.status(201).json({
 			message: "Tạo khóa học thành công",
 			data: course,
 		});
 	} catch (error) {
-		res.status(400).json({
-			message: "Validation failed",
-		});
+		res.status(500).json({ message: "Create course failed", error });
 	}
 };
+
 export const getCourses = async (_req: Request, res: Response) => {
 	try {
 		const courses = await getCoursesService();
 
-		res.json({
-			data: courses,
-		});
+		res.json(courses);
 	} catch (error) {
 		res.status(500).json({ message: "Get courses failed", error });
 	}
@@ -47,9 +40,7 @@ export const getCourseBySlug = async (req: Request, res: Response) => {
 			});
 		}
 
-		res.json({
-			data: course,
-		});
+		res.json(course);
 	} catch (error) {
 		res.status(500).json({ message: "Get course failed", error });
 	}
@@ -58,7 +49,6 @@ export const getCourseBySlug = async (req: Request, res: Response) => {
 export const updateCourse = async (req: Request, res: Response) => {
 	try {
 		const slug = req.params.slug as string;
-
 		const course = await updateCourseService(slug, req.body);
 
 		if (!course) {
@@ -71,12 +61,11 @@ export const updateCourse = async (req: Request, res: Response) => {
 			message: "Cập nhật khóa học thành công",
 			data: course,
 		});
-	} catch (error: any) {
-		res.status(500).json({
-			message: error.message || "Update course failed",
-		});
+	} catch (error) {
+		res.status(500).json({ message: "Update course failed", error });
 	}
 };
+
 export const deleteCourse = async (req: Request, res: Response) => {
 	try {
 		const slug = req.params.slug as string;
