@@ -17,6 +17,8 @@ import { FavoritesPage } from "@/pages/client/favorite/FavoritesPage";
 import { ProfilePage } from "@/pages/client/profile/ProfilePage";
 import { SearchResultsPage } from "@/pages/client/search/SearchResults";
 import routes from "@/routes/routes";
+import { CourseFormPage } from "@/pages/admin/courses/CourseFormPage";
+import { CourseContentPage } from "@/pages/admin/courses/CoursesContentPage";
 
 export const authRoutes = [
 	{ path: routes.login, layout: ClientLayout, element: LoginPage },
@@ -25,7 +27,13 @@ export const authRoutes = [
 export const adminRoutes = [
 	{ path: routes.dashboard, layout: AdminLayout, element: DashboardPage },
 	{ path: routes.courses, layout: AdminLayout, element: CoursesPage },
-	{ path: routes.addCategory, layout: AdminLayout, element: CoursesPage },
+	{ path: routes.addCourse, layout: AdminLayout, element: CourseFormPage },
+	{ path: routes.editCourse, layout: AdminLayout, element: CourseFormPage },
+	{
+		path: routes.courseLesson,
+		layout: AdminLayout,
+		element: CourseContentPage,
+	},
 	{ path: routes.students, layout: AdminLayout, element: StudentsPage },
 	{ path: routes.settings, layout: AdminLayout, element: SettingsPage },
 ];

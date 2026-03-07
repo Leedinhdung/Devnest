@@ -1,0 +1,18 @@
+export const uploadImageToCloudinary = async (file: File) => {
+	const formData = new FormData();
+
+	formData.append("file", file);
+	formData.append("upload_preset", "course_upload");
+
+	const res = await fetch(
+		"https://api.cloudinary.com/v1_1/dbg742muf/image/upload",
+		{
+			method: "POST",
+			body: formData,
+		},
+	);
+
+	const data = await res.json();
+
+	return data.secure_url;
+};

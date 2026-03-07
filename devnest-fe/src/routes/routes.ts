@@ -2,7 +2,9 @@ const routes = {
 	//Admin
 	dashboard: "/quan-tri/tong-quan",
 	courses: "/quan-tri/khoa-hoc",
-	addCategory: "/quan-tri/khoa-hoc/danh-muc/:slug",
+	addCourse: "/quan-tri/khoa-hoc/them-khoa-hoc",
+	editCourse: "/quan-tri/khoa-hoc/:slug",
+	courseLesson: "/quan-tri/khoa-hoc/bai-hoc/:slug",
 	students: "/quan-tri/hoc-vien",
 	settings: "/quan-tri/cai-dat",
 	//Client
