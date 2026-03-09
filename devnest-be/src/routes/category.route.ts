@@ -5,7 +5,7 @@ import {
 	getCategoryBySlug,
 	restoreCategory,
 	updateCategory,
-} from "@/controllers/category/category.controller.js";
+} from "@/controllers/category.controller.js";
 import { isAdmin, verifyAccessToken } from "@/middlewares/auth.middleware.js";
 import express from "express";
 const router = express.Router();
