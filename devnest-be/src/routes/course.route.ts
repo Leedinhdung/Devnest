@@ -4,7 +4,7 @@ import {
 	getCourseBySlug,
 	getCourses,
 	updateCourse,
-} from "@/controllers/course/course.controller.js";
+} from "@/controllers/course.controller.js";
 import { Router } from "express";
 
 const router = Router();

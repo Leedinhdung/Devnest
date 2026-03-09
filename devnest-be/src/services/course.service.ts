@@ -42,7 +42,7 @@ export const deleteCourseService = async (slug: string) => {
 export const restoreCourseService = async (slug: string) => {
 	return courseModel.findOneAndUpdate(
 		{ slug },
-		{ is_deleted: false },
+		{ is_deleted: false, deleted_at: null },
 		{ returnDocument: "after" },
 	);
 };

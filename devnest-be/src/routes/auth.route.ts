@@ -5,7 +5,7 @@ import {
 	refresh,
 	register,
 	verifyEmail,
-} from "@/controllers/auth/auth.controller.js";
+} from "@/controllers/auth.controller.js";
 import { verifyAccessToken } from "@/middlewares/auth.middleware.js";
 import { validate } from "@/middlewares/validate.js";
 import { loginSchema, registerSchema } from "@/validators/auth.validator.js";

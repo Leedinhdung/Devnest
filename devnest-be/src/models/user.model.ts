@@ -1,4 +1,4 @@
-import { IUser } from "@/types/user.js";
+import { IUser } from "@/types/user.type.js";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema<IUser>(
 		password: { type: String, required: true },
 		role: {
 			type: String,
-			enum: ["admin", "instructor", "student"],
+			enum: ["admin", "student"],
 			default: "student",
 		},
 		refreshToken: { type: String, default: null },
