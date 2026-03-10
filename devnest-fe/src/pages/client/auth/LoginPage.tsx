@@ -1,4 +1,4 @@
-import { useLogin, useRegister, useVerifyEmail } from '@/hooks/auth/auth'
+import { useLogin, useRegister, useVerifyEmail } from '@/hooks/auth'
 import { AuthFormType, authSchema } from '@/validators/auth.validate'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AnimatePresence, motion } from 'framer-motion'

@@ -1,10 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Modal } from '@/components/ui/modal'
 import { useAuth } from '@/context/AuthContext'
-import { useGetCategories } from '@/hooks/category/category'
+import { useGetCategories } from '@/hooks/category'
 import { useGetSlugParams } from '@/hooks/common'
-import { useCreateCourse, useGetCourseBySlug, useUpdateCourse } from '@/hooks/course/course'
+import { useCreateCourse, useGetCourseBySlug, useUpdateCourse } from '@/hooks/course'
 import routes from '@/routes/routes'
 import { CourseFormPayload } from '@/types/course.type'
 

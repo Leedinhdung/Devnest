@@ -1,6 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { useCart } from '@/context/CartContext'
-import { useLogout } from '@/hooks/auth/auth'
+import { useLogout } from '@/hooks/auth'
 import routes from '@/routes/routes'
 import { AnimatePresence, motion } from 'framer-motion'
 import {

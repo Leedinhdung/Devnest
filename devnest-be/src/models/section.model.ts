@@ -30,5 +30,13 @@ const sectionSchema = new mongoose.Schema(
 		timestamps: true,
 	},
 );
+sectionSchema.virtual("lessons", {
+	ref: "Lesson",
+	localField: "_id",
+	foreignField: "section_id",
+	justOne: false,
+});
+sectionSchema.set("toObject", { virtuals: true });
+sectionSchema.set("toJSON", { virtuals: true });
 sectionSchema.index({ course_id: 1 });
 export default mongoose.model("Section", sectionSchema);

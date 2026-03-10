@@ -27,6 +27,11 @@ export const getSectionsService = async () => {
 		.find({
 			deleted_at: null,
 		})
+		.populate({
+			path: "lessons",
+			match: { is_deleted: false },
+			options: { sort: { order_index: 1 } },
+		})
 		.sort({ order_index: 1 });
 
 	return sections;
