@@ -1,5 +1,5 @@
 import { Modal } from '@/components/ui/modal'
-import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/category/category'
+import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/category'
 import { CategoryPayload, CategoryResponse } from '@/types/category.type'
 import { categorySchema } from '@/validators/category.validate'
 import { zodResolver } from '@hookform/resolvers/zod'
