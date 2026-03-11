@@ -24,6 +24,7 @@ const lessonSchema = new mongoose.Schema(
 			type: String,
 			unique: true,
 		},
+		description: String,
 
 		lesson_type: {
 			type: String,
@@ -31,13 +32,13 @@ const lessonSchema = new mongoose.Schema(
 			required: true,
 		},
 
-		video_url: String,
+		video_url: { type: String, default: "" },
 
-		content: String,
+		content: { type: String, default: "" },
 
 		duration: {
-			type: Number,
-			default: 0,
+			type: String,
+			default: "",
 		},
 
 		is_preview: {
@@ -63,6 +64,5 @@ const lessonSchema = new mongoose.Schema(
 	},
 );
 
-lessonSchema.index({ course_id: 1 });
-lessonSchema.index({ section_id: 1 });
+lessonSchema.index({ course_id: 1, section_id: 1 });
 export default mongoose.model("Lesson", lessonSchema);

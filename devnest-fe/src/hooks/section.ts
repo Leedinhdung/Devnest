@@ -23,8 +23,8 @@ export const useGetSectionById = (
 ) => {
 	return useQuery<SectionResponse>({
 		...options,
-		queryKey: ["section-by-slug", id],
-		queryFn: () => sectionApi.getSectionBySlug(id),
+		queryKey: ["section-by-id", id],
+		queryFn: () => sectionApi.getSectionById(id),
 		enabled: !!id,
 	});
 };

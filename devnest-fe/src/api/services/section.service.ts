@@ -14,7 +14,7 @@ export const sectionApi = {
 	): Promise<SectionResponse> => {
 		return axiosClient.post(sectionUri.CREATE, data);
 	},
-	getSectionBySlug: async (id: string): Promise<SectionResponse> => {
+	getSectionById: async (id: string): Promise<SectionResponse> => {
 		return axiosClient.get(sectionUri.GET_SECTION_BY_ID(id));
 	},
 	updateSection: async ({

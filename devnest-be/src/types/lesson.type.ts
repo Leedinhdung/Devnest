@@ -33,10 +33,11 @@ export interface CreateLessonPayload {
 	course_id: string;
 	section_id: string;
 	title: string;
+	description: string;
 	lesson_type: LessonType;
 	video_url?: string;
 	content?: string;
-	duration?: number;
+	duration?: string;
 	is_preview?: boolean;
 }
 export type UpdateLessonPayload = Partial<{
@@ -44,6 +45,6 @@ export type UpdateLessonPayload = Partial<{
 	lesson_type: LessonType;
 	video_url: string;
 	content: string;
-	duration?: number;
+	duration?: string;
 	is_preview: boolean;
 }>;

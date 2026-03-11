@@ -1,8 +1,10 @@
+import lessonModel from "@/models/lesson.model.js";
 import sectionModel from "@/models/section.model.js";
 import {
 	CreateSectionPayload,
 	UpdateSectionPayload,
 } from "@/types/section.type.js";
+import mongoose from "mongoose";
 
 export const createSectionService = async (data: CreateSectionPayload) => {
 	const lastSection = await sectionModel
@@ -56,11 +58,24 @@ export const updateSectionService = async (
 	return section;
 };
 export const deleteSectionService = async (sectionId: string) => {
-	return sectionModel.findByIdAndUpdate(
+	const section = await sectionModel.findByIdAndUpdate(
 		sectionId,
-		{ deleted_at: new Date(), is_deleted: true },
+		{
+			is_deleted: true,
+			deleted_at: new Date(),
+		},
 		{ returnDocument: "after" },
 	);
+
+	await lessonModel.updateMany(
+		{ section_id: sectionId },
+		{
+			is_deleted: true,
+			deleted_at: new Date(),
+		},
+	);
+
+	return section;
 };
 export const restoreSectionService = async (sectionId: string) => {
 	const section = await sectionModel.findByIdAndUpdate(

@@ -10,10 +10,11 @@ export const createLessonService = async (data: CreateLessonPayload) => {
 		title,
 		course_id,
 		section_id,
+		description,
 		lesson_type,
 		video_url,
 		content,
-		duration = 0,
+		duration = "",
 		is_preview,
 	} = data;
 
@@ -23,6 +24,7 @@ export const createLessonService = async (data: CreateLessonPayload) => {
 		slug: slugify(title, { lower: true }),
 		course_id,
 		section_id,
+		description,
 		lesson_type,
 		video_url,
 		content,
@@ -49,10 +51,10 @@ export const getLessonDetailService = async (slug: string) => {
 	return lesson;
 };
 export const updateLessonService = async (
-	lessonId: string,
+	slug: string,
 	data: UpdateLessonPayload,
 ) => {
-	const lesson = await lessonModel.findByIdAndUpdate(lessonId, data, {
+	const lesson = await lessonModel.findOneAndUpdate({ slug }, data, {
 		returnDocument: "after",
 	});
 
