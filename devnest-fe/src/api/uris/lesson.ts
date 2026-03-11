@@ -6,4 +6,5 @@ export const lessonUri = {
 	UPDATE: (slug: string) => `${LESSON_URL}/${slug}`,
 	DELETE: (slug: string) => `${LESSON_URL}/${slug}`,
 	RESTORE: (slug: string) => `${LESSON_URL}/restore/${slug}`,
+	REORDER: `${LESSON_URL}/reorder`,
 };

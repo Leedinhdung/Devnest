@@ -1,6 +1,5 @@
-
 import { sectionApi } from "@/api/services/section.service";
-import {  CreateSectionPayload, SectionResponse } from "@/types/section.type";
+import { CreateSectionPayload, SectionResponse } from "@/types/section.type";
 import {
 	useMutation,
 	useQuery,
@@ -58,6 +57,17 @@ export const useDeleteSection = () => {
 		mutationFn: async (id: string) => {
 			return sectionApi.deleteSection(id);
 		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["sections"] });
+		},
+	});
+};
+export const useReorderSection = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: sectionApi.reorderSection,
+
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["sections"] });
 		},

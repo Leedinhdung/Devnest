@@ -28,4 +28,7 @@ export const lessonApi = {
 	deleteLesson: async (slug: string): Promise<LessonResponse> => {
 		return axiosClient.delete(lessonUri.DELETE(slug));
 	},
+	reorderLesson: async (data: { id: string; order_index: number }[]) => {
+		return axiosClient.patch(lessonUri.REORDER, data);
+	},
 };

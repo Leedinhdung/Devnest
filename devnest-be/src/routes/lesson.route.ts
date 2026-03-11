@@ -3,6 +3,7 @@ import {
 	deleteLesson,
 	getLessonDetail,
 	getLessons,
+	reorderLessons,
 	restoreLesson,
 	updateLesson,
 } from "@/controllers/lesson.controller.js";
@@ -15,4 +16,5 @@ router.get("/:slug", getLessonDetail);
 router.put("/:slug", updateLesson);
 router.delete("/:slug", deleteLesson);
 router.patch("/restore/:slug", restoreLesson);
+router.patch("/reorder", reorderLessons);
 export default router;
