@@ -1,74 +1,36 @@
-import { Badge } from '@/components/ui/badge'
+import { LessonModal } from '@/components/admin/course-content/LessonModal'
+import { SectionModal } from '@/components/admin/course-content/SectionModal'
 import { Modal } from '@/components/ui/modal'
 import { useGetSlugParams } from '@/hooks/common'
 import { useGetCourseBySlug } from '@/hooks/course'
+import { useCreateLesson, useDeleteLesson, useUpdateLesson } from '@/hooks/lesson'
 import { useCreateSection, useDeleteSection, useGetSections, useUpdateSection } from '@/hooks/section'
-import { SectionPayload, SectionResponse } from '@/types/section.type'
+import { LessonFormValues, LessonResponse } from '@/types/lesson.type'
+import { UpdateSectionPayload } from '@/types/section.type'
 import {
     ArrowLeftIcon,
-    CheckCircleIcon,
+    BookOpen,
     ChevronDownIcon,
     ChevronRightIcon,
     ClockIcon,
     EditIcon,
-    EyeIcon,
-    FileVideoIcon,
     GripVerticalIcon,
-    LinkIcon,
-    LockIcon,
     PlayCircleIcon,
     PlusIcon,
     TrashIcon,
-    UnlockIcon,
     VideoIcon
 } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 
-interface Video {
-    url: string
-    type: 'youtube' | 'direct' | 'none'
-}
-interface Lesson {
-    id: number
-    title: string
-    description: string
-    duration: string
-    video: Video
-    isFree: boolean
-    order: number
-}
-
-function getYoutubeId(url: string): string | null {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-    const match = url.match(regExp)
-    return match && match[2].length === 11 ? match[2] : null
-}
-function detectVideoType(url: string): 'youtube' | 'direct' | 'none' {
-    if (!url) return 'none'
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube'
-    return 'direct'
-}
-interface LessonFormData {
-    title: string
-    description: string
-    duration: string
-    videoUrl: string
-    isFree: boolean
-}
-const emptyLessonForm: LessonFormData = {
-    title: '',
-    description: '',
-    duration: '',
-    videoUrl: '',
-    isFree: false,
-}
 interface CourseContentPageProps {
     courseId: number
     onBack: () => void
 }
+type DeleteTarget =
+    | { type: "section"; sectionId: string }
+    | { type: "lesson"; sectionId: string; lessonId: string; slug: string }
+    | null
 export function CourseContentPage({
-    courseId,
     onBack,
 }: CourseContentPageProps) {
     const slug = useGetSlugParams("slug")
@@ -77,34 +39,36 @@ export function CourseContentPage({
     const createSectionAsync = useCreateSection()
     const updateSectionAsync = useUpdateSection()
     const deleteSectionAsync = useDeleteSection()
-    // const [chapters, setChapters] = useState<Chapter[]>(initialChapters)
-    // Chapter modal
+
+    const createLessonAsync = useCreateLesson()
+    const updateLessonAsync = useUpdateLesson()
+    const deleteLessonAsync = useDeleteLesson()
+
+    // Section modal
     const [isSectionModalOpen, setIsSectionModalOpen] = useState(false)
-    const [editingSection, setEditingSection] = useState<SectionPayload | null>(null)
+    const [editingSection, setEditingSection] = useState<UpdateSectionPayload | null>(null)
+    const [expandedSections, setExpandedSections] = useState<string[]>([])
+    const [targetSectionId, setTargetSectionId] = useState<string | null>(null)
+
     // Lesson modal
     const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
-    const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
-    const [targetSectionId, setTargetSectionId] = useState<string | null>(null)
-    const [lessonForm, setLessonForm] = useState<LessonFormData>(emptyLessonForm)
-    const [videoPreview, setVideoPreview] = useState(false)
+    const [editingLesson, setEditingLesson] = useState<LessonResponse | null>(null)
+
     // Delete confirm
-    const [deleteTarget, setDeleteTarget] = useState<{
-        type: 'section' | 'lesson'
-        sectionId: string
-        lessonId?: string
-    } | null>(null)
-    const {
-        register,
-        reset,
-        setValue,
-        handleSubmit,
-        formState: { error, isSubmitting }
-    } = useForm()
-    const onSubmit = async (data: { title: string }) => {
+    const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null)
+    const toggleSection = (id: string) => {
+        setExpandedSections(prev =>
+            prev.includes(id)
+                ? prev.filter(s => s !== id)
+                : [...prev, id]
+        )
+    }
+
+    const onSubmitSection = async (data: { title: string }) => {
         try {
             if (editingSection) {
                 await updateSectionAsync.mutateAsync({
-                    id: editingSection._id,
+                    id: editingSection.id,
                     title: data.title
                 })
                 setIsSectionModalOpen(false)
@@ -118,7 +82,30 @@ export function CourseContentPage({
                 setIsSectionModalOpen(false)
             }
             setEditingSection(null)
-            reset()
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    const onSubmitLesson = async (data: LessonFormValues) => {
+        try {
+            if (editingLesson) {
+                await updateLessonAsync.mutateAsync({
+                    slug: editingLesson.slug,
+                    data
+                })
+                setIsLessonModalOpen(false)
+            } else {
+                await createLessonAsync.mutateAsync(
+                    {
+                        course_id: course!._id,
+                        section_id: targetSectionId!,
+                        ...data
+                    }
+                )
+            }
+            setEditingLesson(null)
+            setIsLessonModalOpen(false)
 
         } catch (error) {
             console.log(error)
@@ -130,102 +117,51 @@ export function CourseContentPage({
         0,
     )
     // Chapter actions
-    const openEditSection = (section: SectionResponse) => {
+    const openEditSection = (section: UpdateSectionPayload) => {
         setEditingSection(section)
         setIsSectionModalOpen(true)
-        setValue("title", section.title)
     }
-
-    const deleteSection = (sectionId: string) => {
-        deleteSectionAsync.mutateAsync(sectionId, {
-            onSuccess: () => {
-                setDeleteTarget(null)
-            }
-        })
-        setDeleteTarget(null)
+    const openCreateLesson = (sectionId: string) => {
+        setEditingLesson(null)
+        setTargetSectionId(sectionId)
+        setIsLessonModalOpen(true)
+    }
+    const openEditLesson = (lesson: LessonResponse) => {
+        setEditingLesson(lesson)
+        setTargetSectionId(lesson.section_id)
+        setIsLessonModalOpen(true)
+    }
+    const deleteSection = async (sectionId: string) => {
+        try {
+            await deleteSectionAsync.mutateAsync(sectionId)
+            setDeleteTarget(null)
+        } catch (error) {
+            console.error(error)
+        }
     }
     // Lesson actions
-    const openAddLesson = (chapterId: number) => {
-        setEditingLesson(null)
-        setTargetChapterId(chapterId)
-        setLessonForm(emptyLessonForm)
-        setVideoPreview(false)
-        setIsLessonModalOpen(true)
-    }
-    const openEditLesson = (chapterId: number, lesson: Lesson) => {
-        setEditingLesson(lesson)
-        setTargetChapterId(chapterId)
-        setLessonForm({
-            title: lesson.title,
-            description: lesson.description,
-            duration: lesson.duration,
-            videoUrl: lesson.video.url,
-            isFree: lesson.isFree,
-        })
-        setVideoPreview(false)
-        setIsLessonModalOpen(true)
-    }
-    const saveLesson = () => {
-        if (!lessonForm.title.trim() || targetChapterId === null) return
-        const videoType = detectVideoType(lessonForm.videoUrl)
-        const video: Video = {
-            url: lessonForm.videoUrl,
-            type: videoType,
-        }
-        if (editingLesson) {
-            setChapters((prev) =>
-                prev.map((ch) =>
-                    ch.id === targetChapterId
-                        ? {
-                            ...ch,
-                            lessons: ch.lessons.map((l) =>
-                                l.id === editingLesson.id
-                                    ? {
-                                        ...l,
-                                        title: lessonForm.title,
-                                        description: lessonForm.description,
-                                        duration: lessonForm.duration,
-                                        video,
-                                        isFree: lessonForm.isFree,
-                                    }
-                                    : l,
-                            ),
-                        }
-                        : ch,
-                ),
-            )
-        } else {
-            const chapter = sections.find((ch) => ch._id === targetChapterId)
-            const newLesson: Lesson = {
-                id: Date.now(),
-                title: lessonForm.title,
-                description: lessonForm.description,
-                duration: lessonForm.duration,
-                video,
-                isFree: lessonForm.isFree,
-                order: (chapter?.lessons.length ?? 0) + 1,
-            }
-            setChapters((prev) =>
-                prev.map((ch) =>
-                    ch.id === targetChapterId
-                        ? {
-                            ...ch,
-                            lessons: [...ch.lessons, newLesson],
-                            isExpanded: true,
-                        }
-                        : ch,
-                ),
-            )
-        }
-        setIsLessonModalOpen(false)
-    }
-    const deleteLesson = () => {
 
+    const deleteLesson = async (slug: string) => {
+        try {
+            await deleteLessonAsync.mutateAsync(slug)
+            setDeleteTarget(null)
+        } catch (error) {
+            console.error(error)
+        }
     }
-    const youtubeId = lessonForm.videoUrl
-        ? getYoutubeId(lessonForm.videoUrl)
-        : null
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return
 
+        if (deleteTarget.type === "section") {
+            await deleteSection(deleteTarget.sectionId)
+        }
+
+        if (deleteTarget.type === "lesson") {
+            await deleteLesson(deleteTarget.slug)
+        }
+
+        setDeleteTarget(null)
+    }
     return (
         <div className="space-y-5">
             {/* Back + Course Header */}
@@ -296,6 +232,7 @@ export function CourseContentPage({
                                 <GripVerticalIcon className="w-4 h-4" />
                             </div>
                             <button
+                                onClick={() => toggleSection(section._id)}
                                 className="flex items-center gap-2 flex-1 min-w-0 text-left"
                             >
                                 <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
@@ -311,7 +248,7 @@ export function CourseContentPage({
                                         {section.lessons.length} bài học
                                     </p>
                                 </div>
-                                {section.isExpanded ? (
+                                {expandedSections.includes(section._id) ? (
                                     <ChevronDownIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
                                 ) : (
                                     <ChevronRightIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -319,7 +256,10 @@ export function CourseContentPage({
                             </button>
                             <div className="flex items-center gap-1 flex-shrink-0">
                                 <button
-                                    onClick={() => openAddLesson(section.id)}
+                                    onClick={() => {
+                                        setTargetSectionId(section._id)
+                                        setIsLessonModalOpen(true)
+                                    }}
                                     className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg transition-colors"
                                 >
                                     <PlusIcon className="w-3.5 h-3.5" />
@@ -332,6 +272,7 @@ export function CourseContentPage({
                                     <EditIcon className="w-4 h-4" />
                                 </button>
                                 <button
+                                    type='button'
                                     onClick={() => setDeleteTarget({
                                         type: 'section',
                                         sectionId: section._id,
@@ -344,7 +285,7 @@ export function CourseContentPage({
                         </div>
 
                         {/* Lessons */}
-                        {section.isExpanded && (
+                        {expandedSections.includes(section._id) && (
                             <div className="border-t border-slate-50">
                                 {section.lessons.length === 0 ? (
                                     <div className="px-5 py-8 text-center">
@@ -355,7 +296,7 @@ export function CourseContentPage({
                                             Chưa có bài học nào
                                         </p>
                                         <button
-                                            onClick={() => openAddLesson(section.id)}
+                                            onClick={() => openCreateLesson(section._id)}
                                             className="mt-3 text-xs text-indigo-600 font-medium hover:text-indigo-700"
                                         >
                                             + Thêm bài học đầu tiên
@@ -365,7 +306,7 @@ export function CourseContentPage({
                                     <div className="divide-y divide-slate-50">
                                         {section.lessons.map((lesson, lessonIdx) => (
                                             <div
-                                                key={lesson.id}
+                                                key={lesson._id}
                                                 className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50/50 transition-colors group"
                                             >
                                                 <div className="text-slate-200 group-hover:text-slate-300 flex-shrink-0">
@@ -379,13 +320,13 @@ export function CourseContentPage({
                                                 </div>
                                                 {/* Video indicator */}
                                                 <div className="flex-shrink-0">
-                                                    {lesson.video.type === 'youtube' ? (
+                                                    {lesson.lesson_type === 'video' ? (
                                                         <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
                                                             <PlayCircleIcon className="w-4 h-4 text-red-500" />
                                                         </div>
-                                                    ) : lesson.video.type === 'direct' ? (
+                                                    ) : lesson.lesson_type === 'article' ? (
                                                         <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                            <FileVideoIcon className="w-4 h-4 text-blue-500" />
+                                                            <BookOpen className="w-4 h-4 text-blue-500" />
                                                         </div>
                                                     ) : (
                                                         <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
@@ -399,11 +340,11 @@ export function CourseContentPage({
                                                         <p className="text-sm font-medium text-slate-800 truncate">
                                                             {lesson.title}
                                                         </p>
-                                                        {lesson.isFree ? (
+                                                        {/* {lesson.isFree ? (
                                                             <Badge variant="success">Miễn phí</Badge>
                                                         ) : (
                                                             <Badge variant="neutral">Trả phí</Badge>
-                                                        )}
+                                                        )} */}
                                                     </div>
                                                     {lesson.description && (
                                                         <p className="text-xs text-slate-400 mt-0.5 truncate">
@@ -419,8 +360,8 @@ export function CourseContentPage({
                                                     </div>
                                                 )}
                                                 {/* Video status */}
-                                                <div className="flex-shrink-0 hidden md:block">
-                                                    {lesson.video.type !== 'none' ? (
+                                                {/* <div className="flex-shrink-0 hidden md:block">
+                                                    {lesson.video_url.type !== 'none' ? (
                                                         <span className="text-xs text-emerald-600 flex items-center gap-1">
                                                             <CheckCircleIcon className="w-3.5 h-3.5" /> Có
                                                             video
@@ -430,11 +371,11 @@ export function CourseContentPage({
                                                             Chưa có video
                                                         </span>
                                                     )}
-                                                </div>
+                                                </div> */}
                                                 {/* Actions */}
                                                 <div className="flex items-center gap-1 flex-shrink-0">
                                                     <button
-                                                        onClick={() => openEditLesson(section._id, lesson)}
+                                                        onClick={() => openEditLesson(lesson)}
                                                         className="p-1.5 rounded-lg text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                                                     >
                                                         <EditIcon className="w-3.5 h-3.5" />
@@ -444,7 +385,8 @@ export function CourseContentPage({
                                                             setDeleteTarget({
                                                                 type: 'lesson',
                                                                 sectionId: section._id,
-                                                                lessonId: lesson.id,
+                                                                lessonId: lesson._id,
+                                                                slug: lesson.slug
                                                             })
                                                         }
                                                         className="p-1.5 rounded-lg text-slate-300 hover:text-red-600 hover:bg-red-50 transition-colors"
@@ -460,7 +402,7 @@ export function CourseContentPage({
                                 {section.lessons.length > 0 && (
                                     <div className="px-5 py-3 border-t border-slate-50">
                                         <button
-                                            onClick={() => openAddLesson(section._id)}
+                                            onClick={() => openCreateLesson(section._id)}
                                             className="flex items-center gap-2 text-xs text-slate-400 hover:text-indigo-600 font-medium transition-colors"
                                         >
                                             <PlusIcon className="w-3.5 h-3.5" />
@@ -477,7 +419,10 @@ export function CourseContentPage({
             {/* Add Chapter Button */}
             <button
                 type='button'
-                onClick={() => setIsSectionModalOpen(true)}
+                onClick={() => {
+                    setIsSectionModalOpen(true)
+                    setEditingSection(null)
+                }}
                 className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-sm font-medium text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all"
             >
                 <PlusIcon className="w-4 h-4" />
@@ -485,293 +430,73 @@ export function CourseContentPage({
             </button>
 
             {/* Chapter Modal */}
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Modal
-                    isOpen={isSectionModalOpen}
-                    onClose={() => setIsSectionModalOpen(false)}
-                    title={editingSection ? 'Chỉnh sửa chương' : 'Thêm chương mới'}
-                    size="sm"
-                    footer={
-                        <>
-                            <button
-                                onClick={() => setIsSectionModalOpen(false)}
-                                className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                type='submit'
-                                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors"
-                            >
-                                {editingSection ? 'Lưu thay đổi' : 'Thêm chương'}
-                            </button>
-                        </>
-                    }
-                >
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                            Tên chương <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            {...register("title")}
-                            onKeyDown={(e) => e.key === 'Enter' && saveChapter()}
-                            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            placeholder="VD: Giới thiệu khóa học..."
-                            autoFocus
-                        />
+            <SectionModal
+                open={isSectionModalOpen}
+                onClose={() => {
+                    setIsSectionModalOpen(false)
+                    setEditingSection(null)
+                }}
+                defaultValue={editingSection}
+                onSubmit={onSubmitSection}
+            />
+            {/* Lesson Modal */}
+            <LessonModal
+                key={editingLesson?._id || "create"}
+                open={isLessonModalOpen}
+                onClose={() => setIsLessonModalOpen(false)}
+                defaultValue={
+                    editingLesson
+                        ? {
+                            title: editingLesson.title || "",
+                            description: editingLesson.description || "",
+                            duration: editingLesson.duration || "",
+                            video_url: editingLesson.video_url || "",
+                            lesson_type: editingLesson.lesson_type || "video",
+                            content: editingLesson.content || "",
+                            is_preview: editingLesson.is_preview ?? false
+                        }
+                        : null
+                }
+                onSubmit={onSubmitLesson}
+            />
+            {/* Delete Confirm Modal */}
+            <Modal
+                isOpen={deleteTarget !== null}
+                onClose={() => setDeleteTarget(null)}
+                title="Xác nhận xóa"
+                size="sm"
+                footer={
+                    <>
+                        <button
+                            onClick={() => setDeleteTarget(null)}
+                            className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            onClick={handleConfirmDelete}
+                            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+                        >
+                            Xóa
+                        </button>
+                    </>
+                }
+            >
+                <div className="text-center py-2">
+                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <TrashIcon className="w-6 h-6 text-red-600" />
                     </div>
+                    <p className="text-slate-700 text-sm">
+                        {deleteTarget?.type === 'section'
+                            ? 'Xóa chương này sẽ xóa toàn bộ bài học bên trong.'
+                            : 'Bạn có chắc muốn xóa bài học này?'}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-2">
+                        Hành động này không thể hoàn tác.
+                    </p>
+                </div>
+            </Modal>
 
-                </Modal>
-
-                {/* Lesson Modal */}
-                <Modal
-                    isOpen={isLessonModalOpen}
-                    onClose={() => setIsLessonModalOpen(false)}
-                    title={editingLesson ? 'Chỉnh sửa bài học' : 'Thêm bài học mới'}
-                    size="lg"
-                    footer={
-                        <>
-                            <button
-                                onClick={() => setIsLessonModalOpen(false)}
-                                className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={saveLesson}
-                                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors"
-                            >
-                                {editingLesson ? 'Lưu thay đổi' : 'Thêm bài học'}
-                            </button>
-                        </>
-                    }
-                >
-                    <div className="space-y-4">
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                                Tên bài học <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={lessonForm.title}
-                                onChange={(e) =>
-                                    setLessonForm({
-                                        ...lessonForm,
-                                        title: e.target.value,
-                                    })
-                                }
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="Nhập tên bài học..."
-                            />
-                        </div>
-
-                        {/* Description */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                                Mô tả bài học
-                            </label>
-                            <textarea
-                                value={lessonForm.description}
-                                onChange={(e) =>
-                                    setLessonForm({
-                                        ...lessonForm,
-                                        description: e.target.value,
-                                    })
-                                }
-                                rows={2}
-                                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                                placeholder="Mô tả ngắn về nội dung bài học..."
-                            />
-                        </div>
-
-                        {/* Duration + Free */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                                    <ClockIcon className="w-3.5 h-3.5 inline mr-1" />
-                                    Thời lượng
-                                </label>
-                                <input
-                                    type="text"
-                                    value={lessonForm.duration}
-                                    onChange={(e) =>
-                                        setLessonForm({
-                                            ...lessonForm,
-                                            duration: e.target.value,
-                                        })
-                                    }
-                                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
-                                    placeholder="VD: 12:30"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                                    Quyền truy cập
-                                </label>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() =>
-                                            setLessonForm({
-                                                ...lessonForm,
-                                                isFree: true,
-                                            })
-                                        }
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border transition-colors ${lessonForm.isFree ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <UnlockIcon className="w-3.5 h-3.5" />
-                                        Miễn phí
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            setLessonForm({
-                                                ...lessonForm,
-                                                isFree: false,
-                                            })
-                                        }
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border transition-colors ${!lessonForm.isFree ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                                    >
-                                        <LockIcon className="w-3.5 h-3.5" />
-                                        Trả phí
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Video URL */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                                <VideoIcon className="w-3.5 h-3.5 inline mr-1" />
-                                Video bài học
-                            </label>
-                            <div className="flex gap-2">
-                                <div className="flex-1 flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent">
-                                    <LinkIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                                    <input
-                                        type="url"
-                                        value={lessonForm.videoUrl}
-                                        onChange={(e) => {
-                                            setLessonForm({
-                                                ...lessonForm,
-                                                videoUrl: e.target.value,
-                                            })
-                                            setVideoPreview(false)
-                                        }}
-                                        className="flex-1 bg-transparent text-sm text-slate-800 outline-none"
-                                        placeholder="Dán link YouTube hoặc URL video..."
-                                    />
-                                    {lessonForm.videoUrl && (
-                                        <button
-                                            onClick={() =>
-                                                setLessonForm({
-                                                    ...lessonForm,
-                                                    videoUrl: '',
-                                                })
-                                            }
-                                            className="text-slate-300 hover:text-slate-500 text-xs"
-                                        >
-                                            ✕
-                                        </button>
-                                    )}
-                                </div>
-                                {lessonForm.videoUrl && (
-                                    <button
-                                        onClick={() => setVideoPreview(!videoPreview)}
-                                        className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0"
-                                    >
-                                        <EyeIcon className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Xem thử</span>
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Video type hint */}
-                            {lessonForm.videoUrl && (
-                                <div className="mt-2 flex items-center gap-2">
-                                    {detectVideoType(lessonForm.videoUrl) === 'youtube' ? (
-                                        <span className="text-xs text-red-500 flex items-center gap-1">
-                                            <PlayCircleIcon className="w-3.5 h-3.5" /> YouTube video đã
-                                            nhận diện
-                                        </span>
-                                    ) : (
-                                        <span className="text-xs text-blue-500 flex items-center gap-1">
-                                            <FileVideoIcon className="w-3.5 h-3.5" /> URL video trực
-                                            tiếp
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Video Preview */}
-                            {videoPreview && lessonForm.videoUrl && (
-                                <div className="mt-3 rounded-xl overflow-hidden bg-black aspect-video">
-                                    {youtubeId ? (
-                                        <iframe
-                                            src={`https://www.youtube.com/embed/${youtubeId}`}
-                                            className="w-full h-full"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                            title="Video preview"
-                                        />
-                                    ) : (
-                                        <video
-                                            src={lessonForm.videoUrl}
-                                            controls
-                                            className="w-full h-full"
-                                        />
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </Modal>
-
-                {/* Delete Confirm Modal */}
-                <Modal
-                    isOpen={deleteTarget !== null}
-                    onClose={() => setDeleteTarget(null)}
-                    title="Xác nhận xóa"
-                    size="sm"
-                    footer={
-                        <>
-                            <button
-                                onClick={() => setDeleteTarget(null)}
-                                className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (!deleteTarget) return
-                                    if (deleteTarget.type === 'section')
-                                        deleteSection(deleteTarget.sectionId)
-                                    else if (deleteTarget.lessonId)
-                                        deleteLesson(deleteTarget.sectionId, deleteTarget.lessonId)
-                                }}
-                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
-                            >
-                                Xóa
-                            </button>
-                        </>
-                    }
-                >
-                    <div className="text-center py-2">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <TrashIcon className="w-6 h-6 text-red-600" />
-                        </div>
-                        <p className="text-slate-700 text-sm">
-                            {deleteTarget?.type === 'section'
-                                ? 'Xóa chương này sẽ xóa toàn bộ bài học bên trong.'
-                                : 'Bạn có chắc muốn xóa bài học này?'}
-                        </p>
-                        <p className="text-slate-400 text-xs mt-2">
-                            Hành động này không thể hoàn tác.
-                        </p>
-                    </div>
-                </Modal>
-            </form>
         </div>
     )
 }
