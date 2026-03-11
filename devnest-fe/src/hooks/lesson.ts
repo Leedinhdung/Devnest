@@ -69,3 +69,16 @@ export const useDeleteLesson = () => {
 		},
 	});
 };
+export const useReorderLesson = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: lessonApi.reorderLesson,
+
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["sections"],
+			});
+		},
+	});
+};

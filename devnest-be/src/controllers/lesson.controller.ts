@@ -84,7 +84,7 @@ export const restoreLesson = async (req: Request, res: Response) => {
 };
 export const reorderLessons = async (req: Request, res: Response) => {
 	try {
-		const { lessons } = req.body;
+		const lessons = req.body;
 		await reorderLessonService(lessons);
 		res.json({
 			message: "Lessons reordered successfully",

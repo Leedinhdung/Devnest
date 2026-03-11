@@ -80,7 +80,7 @@ export const restoreSection = async (req: Request, res: Response) => {
 };
 export const reorderSections = async (req: Request, res: Response) => {
 	try {
-		const { sections } = req.body;
+		const sections = req.body;
 		await reorderSectionsService(sections);
 		res.json({
 			message: "Sections reordered successfully",

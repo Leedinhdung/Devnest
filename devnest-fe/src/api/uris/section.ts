@@ -6,4 +6,5 @@ export const sectionUri = {
 	UPDATE: (id: string) => `${SECTION_URL}/${id}`,
 	DELETE: (id: string) => `${SECTION_URL}/${id}`,
 	RESTORE: (id: string) => `${SECTION_URL}/restore/${id}`,
+	REORDER: `${SECTION_URL}/reorder`,
 };

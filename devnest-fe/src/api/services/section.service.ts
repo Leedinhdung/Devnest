@@ -1,9 +1,6 @@
 import { sectionUri } from "@/api/uris/section";
 import axiosClient from "@/configs/axiosClient";
-import {
-	CreateSectionPayload,
-	SectionResponse,
-} from "@/types/section.type";
+import { CreateSectionPayload, SectionResponse } from "@/types/section.type";
 
 export const sectionApi = {
 	getSections: async (): Promise<SectionResponse[]> => {
@@ -28,5 +25,8 @@ export const sectionApi = {
 	},
 	deleteSection: async (id: string): Promise<SectionResponse> => {
 		return axiosClient.delete(sectionUri.DELETE(id));
+	},
+	reorderSection: async (data: { id: string; order_index: number }[]) => {
+		return axiosClient.patch(sectionUri.REORDER, data);
 	},
 };
