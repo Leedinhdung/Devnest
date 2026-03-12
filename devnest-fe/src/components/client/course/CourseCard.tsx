@@ -3,12 +3,12 @@ import { BarChart2Icon, BookmarkIcon, ClockIcon, UsersIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { CategoryBadge } from '@/components/client/category/CategoryBadge'
-import { ProgressBar } from '@/components/client/progressbar/ProgressBar'
 import { StarRating } from '@/components/client/rating/StarRating'
-import { Course, formatPrice } from '@/data/mockData'
+import { formatPrice } from '@/data/mockData'
 import routes from '@/routes/routes'
+import { CourseResponse } from '@/types/course.type'
 interface CourseCardProps {
-    course: Course
+    course: CourseResponse
     showProgress?: boolean
     variant?: 'default' | 'horizontal'
 }
@@ -17,9 +17,10 @@ export function CourseCard({
     showProgress = false,
     variant = 'default',
 }: CourseCardProps) {
-    const discount = Math.round(
-        ((course.originalPrice - course.price) / course.originalPrice) * 100,
-    )
+    console.log(course.category_id)
+    const discount = course.discount_price
+        ? Math.round(((course.price - course.discount_price) / course.price) * 100)
+        : 0
     if (variant === 'horizontal') {
         return (
             <motion.div
@@ -31,7 +32,7 @@ export function CourseCard({
                 }}
             >
                 <Link
-                    to={routes.courseDetail.replace(':id', course.id)}
+                    to={routes.courseDetail.replace(':id', course._id)}
                     className="flex gap-4 bg-white rounded-xl border border-gray-100 p-4 hover:shadow-card transition-shadow duration-200 group"
                 >
                     <div className="relative flex-shrink-0 w-40 h-28 rounded-lg overflow-hidden">
@@ -40,34 +41,34 @@ export function CourseCard({
                             alt={course.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        {course.isBestseller && (
+                        {/* {course.isBestseller && (
                             <span className="absolute top-2 left-2 bg-accent-500 text-white text-xs font-bold px-2 py-0.5 rounded">
                                 Bán chạy
                             </span>
-                        )}
+                        )} */}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <CategoryBadge category={course.category} size="sm" />
+                        <CategoryBadge category={course.category_id?.name ?? "Khác"} size="sm" />
                         <h3 className="font-semibold text-gray-900 mt-1 line-clamp-2 group-hover:text-primary-600 transition-colors">
                             {course.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-0.5">{course.instructor}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">Lee Đình Dũng</p>
                         <StarRating
-                            rating={course.rating}
-                            reviewCount={course.reviewCount}
+                            rating={course.rating_avg}
+                            // reviewCount={course.reviewCount}
                             size="sm"
                         />
-                        {showProgress && course.progress !== undefined && (
+                        {/* {showProgress && course.progress !== undefined && (
                             <div className="mt-2">
                                 <ProgressBar progress={course.progress} size="sm" />
                             </div>
-                        )}
+                        )} */}
                         <div className="flex items-center gap-3 mt-2">
                             <span className="font-bold text-primary-600">
                                 {formatPrice(course.price)}
                             </span>
                             <span className="text-sm text-gray-400 line-through">
-                                {formatPrice(course.originalPrice)}
+                                {formatPrice(course.price)}
                             </span>
                         </div>
                     </div>
@@ -86,7 +87,7 @@ export function CourseCard({
             className="h-full"
         >
             <Link
-                to={routes.courseDetail.replace(':id', course.id)}
+                to={routes.courseDetail.replace(':id', course._id)}
                 className="flex flex-col h-full bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300 group"
             >
                 {/* Thumbnail */}
@@ -99,7 +100,7 @@ export function CourseCard({
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     {/* Badges */}
-                    <div className="absolute top-3 left-3 flex gap-2">
+                    {/* <div className="absolute top-3 left-3 flex gap-2">
                         {course.isBestseller && (
                             <span className="bg-accent-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
                                 🔥 Bán chạy
@@ -110,7 +111,7 @@ export function CourseCard({
                                 ✨ Mới
                             </span>
                         )}
-                    </div>
+                    </div> */}
 
                     {/* Discount badge */}
                     {discount > 0 && (
@@ -132,7 +133,7 @@ export function CourseCard({
                 {/* Content */}
                 <div className="flex flex-col flex-1 p-4">
                     <div className="flex items-center justify-between mb-2">
-                        <CategoryBadge category={course.category} size="sm" />
+                        <CategoryBadge category={course.category_id?.name ?? "Khác"} size="sm" />
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                             {course.level}
                         </span>
@@ -142,22 +143,22 @@ export function CourseCard({
                         {course.title}
                     </h3>
 
-                    <p className="text-sm text-gray-500 mb-2">{course.instructor}</p>
+                    <p className="text-sm text-gray-500 mb-2">Lee Đình Dũng</p>
 
                     <StarRating
-                        rating={course.rating}
-                        reviewCount={course.reviewCount}
+                        rating={course.rating_avg}
+                        // reviewCount={course.reviewCount}
                         size="sm"
                     />
 
                     <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                             <UsersIcon className="w-3.5 h-3.5" />
-                            {course.studentCount.toLocaleString('vi-VN')}
+                            {(course.total_students ?? 0).toLocaleString('vi-VN')}
                         </span>
                         <span className="flex items-center gap-1">
                             <ClockIcon className="w-3.5 h-3.5" />
-                            {course.duration}
+                            {course.total_duration}
                         </span>
                         <span className="flex items-center gap-1">
                             <BarChart2Icon className="w-3.5 h-3.5" />
@@ -165,7 +166,7 @@ export function CourseCard({
                         </span>
                     </div>
 
-                    {showProgress && course.progress !== undefined && (
+                    {/* {showProgress && course.progress !== undefined && (
                         <div className="mt-3">
                             <ProgressBar
                                 progress={course.progress}
@@ -173,16 +174,17 @@ export function CourseCard({
                                 label="Tiến độ"
                             />
                         </div>
-                    )}
+                    )} */}
 
                     <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
                         <div className="flex items-baseline gap-2">
                             <span className="text-lg font-bold text-primary-600">
-                                {formatPrice(course.price)}
+                                {formatPrice(course.discount_price ?? course.price)}
                             </span>
-                            {course.originalPrice > course.price && (
+
+                            {course.discount_price && course.price > course.discount_price && (
                                 <span className="text-sm text-gray-400 line-through">
-                                    {formatPrice(course.originalPrice)}
+                                    {formatPrice(course.price)}
                                 </span>
                             )}
                         </div>

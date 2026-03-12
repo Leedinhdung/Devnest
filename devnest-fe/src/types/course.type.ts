@@ -52,7 +52,9 @@ export interface CourseResponse {
 	description?: string;
 	thumbnail?: string;
 	intro_video?: string;
-	category_id: string;
+	category_id?: {
+		name: string;
+	};
 	created_by: string;
 	level?: "beginner" | "intermediate" | "advanced";
 	price: number;

@@ -38,7 +38,7 @@ export function StarRating({
     return (
         <div className="flex items-center gap-1">
             <span className={`font-semibold text-amber-500 ${textClasses[size]}`}>
-                {rating.toFixed(1)}
+                {(rating ?? 0).toFixed(1)}
             </span>
             <div className="flex items-center gap-0.5">
                 {stars.map((star, i) => (

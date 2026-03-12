@@ -1,26 +1,23 @@
-import React, { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { CourseCard } from '@/components/client/course/CourseCard'
+import { useGetCategories } from '@/hooks/category'
+import { useGetCourses } from '@/hooks/course'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
+    GridIcon,
+    ListIcon,
     SearchIcon,
     SlidersHorizontalIcon,
     XIcon,
-    GridIcon,
-    ListIcon,
 } from 'lucide-react'
-import { courses } from '@/data/mockData'
-import { CourseCard } from '@/components/client/course/CourseCard'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
-const allCategories = [
-    'Tất cả',
-    'Lập trình',
-    'Thiết kế',
-    'Marketing',
-    'Kinh doanh',
-    'Ngoại ngữ',
-    'Nhiếp ảnh',
+const levels = [
+    { label: "Tất cả", value: "all" },
+    { label: "Cơ bản", value: "beginner" },
+    { label: "Trung cấp", value: "intermediate" },
+    { label: "Nâng cao", value: "advanced" },
 ]
-const levels = ['Tất cả', 'Cơ bản', 'Trung cấp', 'Nâng cao']
 const sortOptions = [
     {
         value: 'popular',
@@ -44,67 +41,84 @@ const sortOptions = [
     },
 ]
 export function CoursesPage() {
+    const { data: courses, isLoading } = useGetCourses()
+    const { data: categories = [] } = useGetCategories()
+
     const [searchParams, setSearchParams] = useSearchParams()
     const [search, setSearch] = useState(searchParams.get('search') || '')
     const [selectedCategory, setSelectedCategory] = useState(
         searchParams.get('category') || 'Tất cả',
     )
-    const [selectedLevel, setSelectedLevel] = useState('Tất cả')
+    const [selectedLevel, setSelectedLevel] = useState('all')
     const [sortBy, setSortBy] = useState('popular')
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [showFilters, setShowFilters] = useState(false)
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 3000000])
     const filteredCourses = useMemo(() => {
+        if (!courses) return []
+
         let result = [...courses]
+
         if (search) {
-            result = result.filter(
-                (c) =>
-                    c.title.toLowerCase().includes(search.toLowerCase()) ||
-                    c.instructor.toLowerCase().includes(search.toLowerCase()) ||
-                    c.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())),
+            result = result.filter((c) =>
+                c.title.toLowerCase().includes(search.toLowerCase()),
             )
         }
+
         if (selectedCategory !== 'Tất cả') {
-            result = result.filter((c) => c.category === selectedCategory)
+            result = result.filter(
+                (c) => c.category_id?.name === selectedCategory,
+            )
         }
-        if (selectedLevel !== 'Tất cả') {
+
+        if (selectedLevel !== 'all') {
             result = result.filter((c) => c.level === selectedLevel)
         }
-        result = result.filter(
-            (c) => c.price >= priceRange[0] && c.price <= priceRange[1],
-        )
+
+        result = result.filter((c) => {
+            const finalPrice = c.discount_price ?? c.price
+            return finalPrice >= priceRange[0] && finalPrice <= priceRange[1]
+        })
+
         switch (sortBy) {
-            case 'newest':
-                result = result
-                    .filter((c) => c.isNew)
-                    .concat(result.filter((c) => !c.isNew))
-                break
-            case 'rating':
-                result.sort((a, b) => b.rating - a.rating)
-                break
             case 'price-asc':
-                result.sort((a, b) => a.price - b.price)
+                result.sort(
+                    (a, b) =>
+                        (a.discount_price ?? a.price) -
+                        (b.discount_price ?? b.price),
+                )
                 break
+
             case 'price-desc':
-                result.sort((a, b) => b.price - a.price)
+                result.sort(
+                    (a, b) =>
+                        (b.discount_price ?? b.price) -
+                        (a.discount_price ?? a.price),
+                )
                 break
-            default:
-                result.sort((a, b) => b.studentCount - a.studentCount)
         }
+
         return result
-    }, [search, selectedCategory, selectedLevel, sortBy, priceRange])
+    }, [courses, search, selectedCategory, selectedLevel, sortBy, priceRange])
     const clearFilters = () => {
         setSearch('')
         setSelectedCategory('Tất cả')
-        setSelectedLevel('Tất cả')
+        setSelectedLevel('all')
         setSortBy('popular')
         setPriceRange([0, 3000000])
     }
     const hasActiveFilters =
         search ||
         selectedCategory !== 'Tất cả' ||
-        selectedLevel !== 'Tất cả' ||
+        selectedLevel !== 'all' ||
         sortBy !== 'popular'
+    if (isLoading) {
+        return (
+            <div className="flex justify-center py-20">
+                Loading...
+            </div>
+        )
+    }
     return (
         <main className="w-full min-h-screen bg-gray-50 pt-16">
             {/* Header */}
@@ -114,7 +128,7 @@ export function CoursesPage() {
                         Tất cả khóa học
                     </h1>
                     <p className="text-gray-500">
-                        Khám phá {courses.length}+ khóa học từ các chuyên gia hàng đầu
+                        Khám phá {courses?.length}+ khóa học từ các chuyên gia hàng đầu
                     </p>
                 </div>
             </div>
@@ -160,7 +174,7 @@ export function CoursesPage() {
                         >
                             <SlidersHorizontalIcon className="w-4 h-4" />
                             Bộ lọc
-                         </button>
+                        </button>
 
                         <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden">
                             <button
@@ -209,13 +223,13 @@ export function CoursesPage() {
                                             Danh mục
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
-                                            {allCategories.map((cat) => (
+                                            {categories.map((cat, index) => (
                                                 <button
-                                                    key={cat}
-                                                    onClick={() => setSelectedCategory(cat)}
-                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                                    key={index}
+                                                    onClick={() => setSelectedCategory(cat.name)}
+                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                                 >
-                                                    {cat}
+                                                    {cat.name}
                                                 </button>
                                             ))}
                                         </div>
@@ -228,11 +242,11 @@ export function CoursesPage() {
                                         <div className="flex flex-wrap gap-2">
                                             {levels.map((level) => (
                                                 <button
-                                                    key={level}
-                                                    onClick={() => setSelectedLevel(level)}
-                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedLevel === level ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                                    key={level.value}
+                                                    onClick={() => setSelectedLevel(level.value)}
+                                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedLevel === level.value ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                                                 >
-                                                    {level}
+                                                    {level.label}
                                                 </button>
                                             ))}
                                         </div>
@@ -302,13 +316,19 @@ export function CoursesPage() {
 
                 {/* Category tabs */}
                 <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-                    {allCategories.map((cat) => (
+                    <button
+                        onClick={() => setSelectedCategory("Tất cả")}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === "Tất cả" ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+                    >
+                        Tất cả
+                    </button>
+                    {categories.map((cat, index) => (
                         <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === cat ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+                            key={index}
+                            onClick={() => setSelectedCategory(cat.name)}
+                            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
                         >
-                            {cat}
+                            {cat.name}
                         </button>
                     ))}
                 </div>
@@ -365,7 +385,7 @@ export function CoursesPage() {
                         <AnimatePresence>
                             {filteredCourses.map((course, i) => (
                                 <motion.div
-                                    key={course.id}
+                                    key={course._id}
                                     layout
                                     initial={{
                                         opacity: 0,
@@ -393,7 +413,7 @@ export function CoursesPage() {
                     <div className="space-y-4">
                         {filteredCourses.map((course, i) => (
                             <motion.div
-                                key={course.id}
+                                key={course._id}
                                 initial={{
                                     opacity: 0,
                                     x: -20,
