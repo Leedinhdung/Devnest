@@ -19,6 +19,7 @@ import { SearchResultsPage } from "@/pages/client/search/SearchResults";
 import routes from "@/routes/routes";
 import { CourseFormPage } from "@/pages/admin/courses/CourseFormPage";
 import { CourseContentPage } from "@/pages/admin/courses/CoursesContentPage";
+import { LearnPage } from "@/pages/client/learn/LearnPage";
 
 export const authRoutes = [
 	{ path: routes.login, layout: ClientLayout, element: LoginPage },
@@ -61,4 +62,7 @@ export const clientRoutes = [
 	},
 	{ path: routes.buyCourse, layout: ClientLayout, element: CourseCheckoutPage },
 	{ path: routes.cart, layout: ClientLayout, element: CartPage },
+];
+export const learnRoutes = [
+	{ path: routes.learn, layout: null, element: LearnPage },
 ];

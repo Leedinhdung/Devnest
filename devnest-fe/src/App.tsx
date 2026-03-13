@@ -1,4 +1,4 @@
-import { adminRoutes, authRoutes, clientRoutes } from '@/constants/routesContant'
+import { adminRoutes, authRoutes, clientRoutes, learnRoutes } from '@/constants/routesContant'
 import { useAuth } from '@/context/AuthContext'
 import { AdminLayout } from '@/layouts/admin/AdminLayout'
 import AuthLayout from '@/layouts/admin/AuthLayout'
@@ -30,6 +30,15 @@ const App = () => {
                 <ClientLayout>
                   <route.element />
                 </ClientLayout>
+              }
+            />
+          ))}
+          {learnRoutes.map((route, index) => (
+            <Route
+              key={index}
+              path={route.path}
+              element={ 
+                  <route.element />              
               }
             />
           ))}

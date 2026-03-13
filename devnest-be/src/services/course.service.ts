@@ -1,4 +1,6 @@
 import courseModel from "@/models/course.model.js";
+import lessonModel from "@/models/lesson.model.js";
+import sectionModel from "@/models/section.model.js";
 import slugify from "slugify";
 
 export const createCourseService = async (data) => {
@@ -16,10 +18,51 @@ export const getCoursesService = async () => {
 		.populate("created_by", "name email");
 };
 export const getCourseBySlugService = async (slug: string) => {
-	return courseModel.findOne({
-		slug,
-		is_deleted: false,
-	});
+	const course = await courseModel
+		.findOne({
+			slug,
+			is_deleted: false,
+		})
+		.populate("category_id", "name");
+
+	if (!course) throw new Error("Course not found");
+
+	// lấy sections
+	const sections = await sectionModel
+		.find({
+			course_id: course._id,
+			is_deleted: false,
+		})
+		.sort({ order_index: 1 });
+
+	const sectionIds = sections.map((s) => s._id);
+
+	// lấy lessons
+	const lessons = await lessonModel
+		.find({
+			section_id: { $in: sectionIds },
+			is_deleted: false,
+		})
+		.sort({ order_index: 1 });
+
+	// build curriculum
+	const curriculum = sections.map((section) => ({
+		...section.toObject(),
+		lessons: lessons.filter(
+			(lesson) => lesson.section_id.toString() === section._id.toString(),
+		),
+	}));
+
+	// total
+	const totalSections = sections.length;
+	const totalLessons = lessons.length;
+
+	return {
+		...course.toObject(),
+		totalSections,
+		totalLessons,
+		curriculum,
+	};
 };
 
 export const updateCourseService = async (slug: string, data: any) => {

@@ -81,51 +81,6 @@ export interface Testimonial {
     course: string
 }
 
-export const categories = [
-    {
-        id: '1',
-        name: 'Lập trình',
-        icon: '💻',
-        count: 245,
-        color: 'bg-blue-100 text-blue-700',
-    },
-    {
-        id: '2',
-        name: 'Thiết kế',
-        icon: '🎨',
-        count: 128,
-        color: 'bg-purple-100 text-purple-700',
-    },
-    {
-        id: '3',
-        name: 'Marketing',
-        icon: '📈',
-        count: 96,
-        color: 'bg-green-100 text-green-700',
-    },
-    {
-        id: '4',
-        name: 'Kinh doanh',
-        icon: '💼',
-        count: 87,
-        color: 'bg-yellow-100 text-yellow-700',
-    },
-    {
-        id: '5',
-        name: 'Ngoại ngữ',
-        icon: '🌍',
-        count: 74,
-        color: 'bg-red-100 text-red-700',
-    },
-    {
-        id: '6',
-        name: 'Nhiếp ảnh',
-        icon: '📷',
-        count: 52,
-        color: 'bg-pink-100 text-pink-700',
-    },
-]
-
 export const courses: Course[] = [
     {
         id: '1',
