@@ -1,7 +1,7 @@
 import React from "react"
 
 interface CategoryBadgeProps {
-    category: string
+    category?: string
     size?: "sm" | "md"
 }
 
@@ -19,7 +19,7 @@ const badgeColors = [
 export function CategoryBadge({ category, size = "sm" }: CategoryBadgeProps) {
     // tạo index dựa trên string category
     const index =
-        category.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+        category?.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
         badgeColors.length
 
     const colorClass = badgeColors[index]

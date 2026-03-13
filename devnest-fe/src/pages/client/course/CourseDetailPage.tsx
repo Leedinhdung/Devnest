@@ -1,65 +1,74 @@
-import React, { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-    PlayCircleIcon,
-    ClockIcon,
-    UsersIcon,
+    AwardIcon,
     BarChart2Icon,
-    GlobeIcon,
+    BookmarkIcon,
+    BookOpen,
     CheckCircleIcon,
     ChevronDownIcon,
-    ChevronUpIcon,
-    StarIcon,
-    ShoppingCartIcon,
-    BookmarkIcon,
-    ShareIcon,
-    FileTextIcon,
-    HelpCircleIcon,
-    LockIcon,
     ChevronRightIcon,
-    MonitorIcon,
+    ChevronUpIcon,
+    ClockIcon,
+    FileTextIcon,
+    GlobeIcon,
+    HelpCircleIcon,
     InfinityIcon,
-    AwardIcon,
+    LockIcon,
+    MonitorIcon,
+    PlayCircleIcon,
+    ShareIcon,
+    ShoppingCartIcon,
     SmartphoneIcon,
+    StarIcon,
     ThumbsUpIcon,
+    UsersIcon,
 } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { toast } from 'sonner'
-import { useCart } from '@/context/CartContext'
-import { courses, formatPrice } from '@/data/mockData'
 import { CategoryBadge } from '@/components/client/category/CategoryBadge'
 import { StarRating } from '@/components/client/rating/StarRating'
-import { CourseCard } from '@/components/client/course/CourseCard'
+import { useCart } from '@/context/CartContext'
+import { formatPrice } from '@/data/mockData'
+import { useGetSlugParams } from '@/hooks/common'
+import { useGetCourseBySlug } from '@/hooks/course'
+import { toast } from 'sonner'
+import { formatDate } from '@/utils/date'
+import routes from '@/routes/routes'
 export function CourseDetailPage() {
-    const { id } = useParams<{
-        id: string
-    }>()
+    const slug = useGetSlugParams("slug")
     const navigate = useNavigate()
+    const { data: courseData, isLoading } = useGetCourseBySlug(slug!)
+    console.log(courseData)
+    const course = {
+        ...courseData,
+        isPurchased: true
+    }
     const { addToCart, isInCart } = useCart()
-    const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(
         new Set(['c1']),
     )
     const [activeTab, setActiveTab] = useState<
-        'overview' | 'curriculum' | 'instructor' | 'reviews'
+        'overview' | 'curriculum' | 'reviews'
     >('overview')
-    const course = courses.find((c) => c.id === id) || courses[0]
-    const relatedCourses = courses
-        .filter((c) => c.category === course.category && c.id !== course.id)
-        .slice(0, 3)
-    const totalLessons = course.curriculum.reduce(
-        (acc, ch) => acc + ch.lessons.length,
-        0,
-    )
-    const discount = Math.round(
-        ((course.originalPrice - course.price) / course.originalPrice) * 100,
-    )
-    const toggleChapter = (chapterId: string) => {
-        setExpandedChapters((prev) => {
-            const next = new Set(prev)
-            if (next.has(chapterId)) next.delete(chapterId)
-            else next.add(chapterId)
-            return next
+    const [showPreview, setShowPreview] = useState(false)
+    if (isLoading || !course) {
+        return <div>Loading...</div>
+    }
+    const discount = course.discount_price ? Math.round(
+        ((course.price - course.discount_price) / course.price) * 100,
+    ) : 0
+    const toggleSection = (id: string) => {
+        setExpandedSections((prev) => {
+            const newSet = new Set(prev)
+
+            if (newSet.has(id)) {
+                newSet.delete(id)
+            } else {
+                newSet.add(id)
+            }
+
+            return newSet
         })
     }
     const handleBuyNow = () => {
@@ -78,6 +87,7 @@ export function CourseDetailPage() {
             navigate('/gio-hang')
         }
     }
+    const finalPrice = course.discount_price ?? course.price
     const tabs = [
         {
             id: 'overview',
@@ -88,14 +98,14 @@ export function CourseDetailPage() {
             label: 'Nội dung',
         },
         {
-            id: 'instructor',
-            label: 'Giảng viên',
-        },
-        {
             id: 'reviews',
             label: 'Đánh giá',
         },
     ] as const
+    const getYoutubeEmbed = (url: string) => {
+        const id = url.split("v=")[1]
+        return `https://www.youtube.com/embed/${id}`
+    }
     return (
         <main className="w-full min-h-screen bg-gray-50 pt-16">
             {/* Hero */}
@@ -107,7 +117,7 @@ export function CourseDetailPage() {
                             Trang chủ
                         </Link>
                         <ChevronRightIcon className="w-4 h-4" />
-                        <Link to="/courses" className="hover:text-white transition-colors">
+                        <Link to={routes.coursesList} className="hover:text-white transition-colors">
                             Khóa học
                         </Link>
                         <ChevronRightIcon className="w-4 h-4" />
@@ -116,7 +126,7 @@ export function CourseDetailPage() {
 
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2">
-                            <CategoryBadge category={course.category} size="md" />
+                            <CategoryBadge category={course.category_id?.name} size="md" />
                             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mt-3 mb-4 leading-tight">
                                 {course.title}
                             </h1>
@@ -136,38 +146,35 @@ export function CourseDetailPage() {
                                     </span>
                                 )}
                                 <StarRating
-                                    rating={course.rating}
-                                    reviewCount={course.reviewCount}
+                                    rating={course.rating_avg}
+                                    reviewCount={course.rating_count}
                                     size="md"
                                 />
                                 <span className="text-gray-300 text-sm flex items-center gap-1.5">
                                     <UsersIcon className="w-4 h-4" />
-                                    {course.studentCount.toLocaleString('vi-VN')} học viên
+                                    {course.total_students.toLocaleString('vi-VN')} học viên
                                 </span>
                             </div>
 
                             <div className="flex flex-wrap gap-5 text-sm text-gray-300 mb-5">
                                 <span className="flex items-center gap-1.5">
                                     <ClockIcon className="w-4 h-4 text-gray-400" />
-                                    {course.duration}
+                                    {course.total_duration}
                                 </span>
                                 <span className="flex items-center gap-1.5">
                                     <BarChart2Icon className="w-4 h-4 text-gray-400" />
                                     {course.level}
                                 </span>
-                                <span className="flex items-center gap-1.5">
-                                    <GlobeIcon className="w-4 h-4 text-gray-400" />
-                                    {course.language}
-                                </span>
+
                                 <span className="flex items-center gap-1.5">
                                     <FileTextIcon className="w-4 h-4 text-gray-400" />
-                                    Cập nhật {course.lastUpdated}
+                                    Cập nhật {formatDate(course.updatedAt)}
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 <img
-                                    src={course.instructorAvatar}
+                                    src={course.instructorAvatar || "https://tuanluupiano.com/wp-content/uploads/2026/01/avatar-facebook-mac-dinh-6.jpg"}
                                     alt={course.instructor}
                                     className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-400"
                                 />
@@ -177,7 +184,7 @@ export function CourseDetailPage() {
                                         onClick={() => setActiveTab('instructor')}
                                         className="text-primary-400 font-semibold hover:text-primary-300 transition-colors"
                                     >
-                                        {course.instructor}
+                                        Lee Đình Dũng
                                     </button>
                                 </span>
                             </div>
@@ -193,18 +200,24 @@ export function CourseDetailPage() {
             <div className="lg:hidden sticky top-16 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
                 <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-gray-900">
-                        {formatPrice(course.price)}
+                        {formatPrice(finalPrice)}
                     </span>
-                    <span className="text-sm text-gray-400 line-through">
-                        {formatPrice(course.originalPrice)}
-                    </span>
-                    <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
-                        -{discount}%
-                    </span>
+
+                    {course.discount_price && (
+                        <>
+                            <span className="text-sm text-gray-400 line-through">
+                                {formatPrice(course.price)}
+                            </span>
+
+                            <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
+                                -{discount}%
+                            </span>
+                        </>
+                    )}
                 </div>
                 {course.isPurchased ? (
                     <Link
-                        to={`/learn/${course.id}`}
+                        to={routes.learn.replace(":slug", course.slug)}
                         className="bg-primary-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-primary-700 transition-colors"
                     >
                         Tiếp tục học
@@ -259,7 +272,7 @@ export function CourseDetailPage() {
                                         Bạn sẽ học được gì?
                                     </h2>
                                     <div className="grid sm:grid-cols-2 gap-3">
-                                        {course.objectives.map((obj, i) => (
+                                        {course.requirements.map((obj, i) => (
                                             <div key={i} className="flex items-start gap-3">
                                                 <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
                                                 <span className="text-gray-700 text-sm leading-relaxed">
@@ -327,56 +340,52 @@ export function CourseDetailPage() {
                                                 Nội dung khóa học
                                             </h2>
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {course.curriculum.length} chương · {totalLessons} bài
-                                                học · {course.duration}
+                                                {course.totalSections} chương · {course.totalLessons} bài
+                                                học
                                             </p>
                                         </div>
                                         <button
                                             onClick={() => {
-                                                const allIds = new Set(
-                                                    course.curriculum.map((c) => c.id),
-                                                )
-                                                setExpandedChapters(
-                                                    expandedChapters.size === allIds.size
-                                                        ? new Set()
-                                                        : allIds,
-                                                )
+                                                setExpandedSections((prev) => {
+                                                    const allIds = new Set(course.curriculum.map((c) => c.id))
+                                                    return prev.size === allIds.size ? new Set() : allIds
+                                                })
                                             }}
                                             className="text-sm text-primary-600 font-medium hover:text-primary-700 transition-colors"
                                         >
-                                            {expandedChapters.size === course.curriculum.length
+                                            {expandedSections.size === course.curriculum.length
                                                 ? 'Thu gọn tất cả'
                                                 : 'Mở rộng tất cả'}
                                         </button>
                                     </div>
 
-                                    {course.curriculum.map((chapter, ci) => (
+                                    {course.curriculum.map((section, ci) => (
                                         <div
-                                            key={chapter.id}
+                                            key={section._id}
                                             className="border-b border-gray-50 last:border-0"
                                         >
                                             <button
-                                                onClick={() => toggleChapter(chapter.id)}
+                                                onClick={() => toggleSection(section._id)}
                                                 className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors text-left"
                                             >
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                    {expandedChapters.has(chapter.id) ? (
+                                                    {expandedSections.has(section._id) ? (
                                                         <ChevronUpIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
                                                     ) : (
                                                         <ChevronDownIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
                                                     )}
                                                     <div className="min-w-0">
                                                         <span className="font-semibold text-gray-900 block">
-                                                            Chương {ci + 1}: {chapter.title}
+                                                            Chương {ci + 1}: {section.title}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <span className="text-sm text-gray-500 flex-shrink-0 ml-3">
-                                                    {chapter.lessons.length} bài
+                                                    {section.lessons.length} bài
                                                 </span>
                                             </button>
 
-                                            {expandedChapters.has(chapter.id) && (
+                                            {expandedSections.has(section._id) && (
                                                 <motion.div
                                                     initial={{
                                                         opacity: 0,
@@ -388,18 +397,18 @@ export function CourseDetailPage() {
                                                         duration: 0.2,
                                                     }}
                                                 >
-                                                    {chapter.lessons.map((lesson) => (
+                                                    {section.lessons.map((lesson) => (
                                                         <div
-                                                            key={lesson.id}
+                                                            key={lesson._id}
                                                             className="flex items-center gap-3 px-5 py-3 bg-gray-50/60 border-t border-gray-50 hover:bg-gray-50 transition-colors"
                                                         >
                                                             <div className="flex-shrink-0">
-                                                                {lesson.type === 'video' ? (
+                                                                {lesson.lesson_type === 'video' ? (
                                                                     <PlayCircleIcon
                                                                         className={`w-4 h-4 ${lesson.isPreview ? 'text-primary-500' : 'text-gray-400'}`}
                                                                     />
-                                                                ) : lesson.type === 'quiz' ? (
-                                                                    <HelpCircleIcon className="w-4 h-4 text-amber-500" />
+                                                                ) : lesson.lesson_type === 'article' ? (
+                                                                    <BookOpen className="w-4 h-4 text-amber-500" />
                                                                 ) : (
                                                                     <FileTextIcon className="w-4 h-4 text-gray-400" />
                                                                 )}
@@ -651,7 +660,7 @@ export function CourseDetailPage() {
                         )}
 
                         {/* Related courses */}
-                        {relatedCourses.length > 0 && (
+                        {/* {relatedCourses.length > 0 && (
                             <div className="mt-8">
                                 <h3 className="font-bold text-gray-900 text-xl mb-4">
                                     Khóa học liên quan
@@ -662,7 +671,7 @@ export function CourseDetailPage() {
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Sticky Sidebar */}
@@ -670,34 +679,50 @@ export function CourseDetailPage() {
                         <div className="lg:sticky lg:top-20">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                                 {/* Thumbnail with play button */}
-                                <div className="relative aspect-video group cursor-pointer">
-                                    <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors">
-                                        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                            <PlayCircleIcon className="w-8 h-8 text-primary-600" />
+                                {!showPreview ? (
+                                    <div
+                                        className="relative aspect-video cursor-pointer"
+                                        onClick={() => setShowPreview(true)}
+                                    >
+                                        <img src={course.thumbnail} className="w-full h-full object-cover" />
+
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                            <PlayCircleIcon className="w-16 h-16 text-white" />
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-3 left-3 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full">
-                                        Xem trước miễn phí
+                                ) : (
+                                    <div className="w-full aspect-video">
+                                        {course.intro_video && (
+                                            <iframe
+                                                className="w-full h-full"
+                                                src={getYoutubeEmbed(course.intro_video)}
+                                                title="YouTube video"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        )}
+
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="p-5">
                                     {/* Price */}
                                     <div className="flex items-baseline gap-3 mb-1">
                                         <span className="text-3xl font-bold text-gray-900">
-                                            {formatPrice(course.price)}
+                                            {formatPrice(course.discount_price ?? course.price)}
                                         </span>
-                                        <span className="text-lg text-gray-400 line-through">
-                                            {formatPrice(course.originalPrice)}
-                                        </span>
-                                        <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                                            -{discount}%
-                                        </span>
+
+                                        {course.discount_price && (
+                                            <>
+                                                <span className="text-lg text-gray-400 line-through">
+                                                    {formatPrice(course.price)}
+                                                </span>
+
+                                                <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                                                    -{discount}%
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                     <p className="text-xs text-red-500 font-semibold mb-4 flex items-center gap-1">
                                         ⏰ Ưu đãi kết thúc trong 2 ngày!
@@ -706,7 +731,7 @@ export function CourseDetailPage() {
                                     {/* CTA Buttons */}
                                     {course.isPurchased ? (
                                         <Link
-                                            to={`/learn/${course.id}`}
+                                            to={routes.learn.replace(":slug", course.slug)}
                                             className="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl transition-colors mb-3 text-base"
                                         >
                                             <PlayCircleIcon className="w-5 h-5" />
@@ -754,11 +779,11 @@ export function CourseDetailPage() {
                                         {[
                                             {
                                                 icon: ClockIcon,
-                                                text: `${course.duration} video bài giảng`,
+                                                text: `${course.total_duration} video bài giảng`,
                                             },
                                             {
                                                 icon: FileTextIcon,
-                                                text: `${totalLessons} bài học`,
+                                                text: `${course.total_lessons} bài học`,
                                             },
                                             {
                                                 icon: InfinityIcon,

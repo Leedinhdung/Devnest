@@ -17,7 +17,7 @@ export function CourseCard({
     showProgress = false,
     variant = 'default',
 }: CourseCardProps) {
-    console.log(course.category_id)
+    console.log(course.slug)
     const discount = course.discount_price
         ? Math.round(((course.price - course.discount_price) / course.price) * 100)
         : 0
@@ -32,7 +32,7 @@ export function CourseCard({
                 }}
             >
                 <Link
-                    to={routes.courseDetail.replace(':id', course._id)}
+                    to={routes.courseDetail.replace(':slug', course.slug)}
                     className="flex gap-4 bg-white rounded-xl border border-gray-100 p-4 hover:shadow-card transition-shadow duration-200 group"
                 >
                     <div className="relative flex-shrink-0 w-40 h-28 rounded-lg overflow-hidden">
@@ -87,7 +87,7 @@ export function CourseCard({
             className="h-full"
         >
             <Link
-                to={routes.courseDetail.replace(':id', course._id)}
+                to={routes.courseDetail.replace(':slug', course.slug)}
                 className="flex flex-col h-full bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-card-hover transition-shadow duration-300 group"
             >
                 {/* Thumbnail */}
