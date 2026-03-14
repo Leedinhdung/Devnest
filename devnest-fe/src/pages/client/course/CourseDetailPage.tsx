@@ -35,12 +35,14 @@ import routes from '@/routes/routes'
 import { formatDate } from '@/utils/date'
 import { toast } from 'sonner'
 import { CourseCard } from '@/components/client/course/CourseCard'
+import { getCoursePrice } from '@/utils/coursePrice';
 export function CourseDetailPage() {
     const slug = useGetSlugParams("slug")
     const navigate = useNavigate()
     const { data: course, isLoading } = useGetCourseBySlug(slug!)
     const { data: relatedCourses = [] } = useGetRelatedCourses(slug!)
-    console.log(relatedCourses)
+
+
     const { addToCart, isInCart } = useCart()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(
         new Set(['c1']),
@@ -52,9 +54,7 @@ export function CourseDetailPage() {
     if (isLoading || !course) {
         return <div>Loading...</div>
     }
-    const discount = course.discount_price ? Math.round(
-        ((course.price - course.discount_price) / course.price) * 100,
-    ) : 0
+    const { finalPrice, discount, hasDiscount } = getCoursePrice(course)
     const levelMap: Record<string, string> = {
         beginner: "Cơ bản",
         intermediate: "Trung cấp",
@@ -89,7 +89,7 @@ export function CourseDetailPage() {
             navigate('/gio-hang')
         }
     }
-    const finalPrice = course.discount_price ?? course.price
+
     const tabs = [
         {
             id: 'overview',
@@ -205,7 +205,7 @@ export function CourseDetailPage() {
                         {formatPrice(finalPrice)}
                     </span>
 
-                    {course.discount_price && (
+                    {hasDiscount && (
                         <>
                             <span className="text-sm text-gray-400 line-through">
                                 {formatPrice(course.price)}
@@ -664,10 +664,10 @@ export function CourseDetailPage() {
                                     {/* Price */}
                                     <div className="flex items-baseline gap-3 mb-1">
                                         <span className="text-3xl font-bold text-gray-900">
-                                            {formatPrice(course.discount_price ?? course.price)}
+                                            {formatPrice(finalPrice)}
                                         </span>
 
-                                        {course.discount_price && (
+                                        {hasDiscount && (
                                             <>
                                                 <span className="text-lg text-gray-400 line-through">
                                                     {formatPrice(course.price)}
