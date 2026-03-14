@@ -8,15 +8,19 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { AuthProvider } from '@/context/AuthContext'
+import { Toaster } from "sonner"
+
+
 const queryClient = new QueryClient()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <CartProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <CartProvider>
         <QueryClientProvider client={queryClient}>
           <App />
+          <Toaster position="top-right" richColors />
         </QueryClientProvider>
-      </AuthProvider>
-    </CartProvider>
+      </CartProvider>
+    </AuthProvider>
   </StrictMode>,
 )

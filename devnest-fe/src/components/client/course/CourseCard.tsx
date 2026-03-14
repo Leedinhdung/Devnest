@@ -7,6 +7,7 @@ import { StarRating } from '@/components/client/rating/StarRating'
 import { formatPrice } from '@/data/mockData'
 import routes from '@/routes/routes'
 import { CourseResponse } from '@/types/course.type'
+import { getCoursePrice } from '@/utils/coursePrice'
 interface CourseCardProps {
     course: CourseResponse
     showProgress?: boolean
@@ -17,14 +18,13 @@ export function CourseCard({
     variant = 'default',
 }: CourseCardProps) {
 
-    const discount = course.discount_price
-        ? Math.round(((course.price - course.discount_price) / course.price) * 100)
-        : 0
+    const { finalPrice, discount, hasDiscount } = getCoursePrice(course)
     const levelMap: Record<string, string> = {
         beginner: "Cơ bản",
         intermediate: "Trung cấp",
         advanced: "Nâng cao",
     }
+
     if (variant === 'horizontal') {
         return (
             <motion.div
@@ -136,13 +136,9 @@ export function CourseCard({
 
                 {/* Content */}
                 <div className="flex flex-col flex-1 p-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className=" mb-2">
                         <CategoryBadge category={course.category_id?.name ?? "Khác"} size="sm" />
-                        {course.level && (
-                            <span className="text-xs text-gray-500 bg-primary-100 px-2 py-0.5 rounded-full">
-                                {levelMap[course.level] ?? course.level}
-                            </span>
-                        )}
+
                     </div>
 
                     <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors leading-snug mb-1">
@@ -153,7 +149,7 @@ export function CourseCard({
 
                     <StarRating
                         rating={course.rating_avg}
-                        // reviewCount={course.reviewCount}
+                        reviewCount={course.rating_count}
                         size="sm"
                     />
 
@@ -168,7 +164,11 @@ export function CourseCard({
                         </span>
                         <span className="flex items-center gap-1">
                             <BarChart2Icon className="w-3.5 h-3.5" />
-                            {course.level}
+                            {course.level && (
+                                <span>
+                                    {levelMap[course.level] ?? course.level}
+                                </span>
+                            )}
                         </span>
                     </div>
 
@@ -185,10 +185,10 @@ export function CourseCard({
                     <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
                         <div className="flex items-baseline gap-2">
                             <span className="text-lg font-bold text-primary-600">
-                                {formatPrice(course.discount_price ?? course.price)}
+                                {formatPrice(finalPrice)}
                             </span>
 
-                            {course.discount_price && course.price > course.discount_price && (
+                            {hasDiscount && (
                                 <span className="text-sm text-gray-400 line-through">
                                     {formatPrice(course.price)}
                                 </span>
