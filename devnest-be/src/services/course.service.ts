@@ -89,3 +89,22 @@ export const restoreCourseService = async (slug: string) => {
 		{ returnDocument: "after" },
 	);
 };
+export const relatedCoursesService = async (slug: string) => {
+	const course = await courseModel.findOne({ slug });
+
+	if (!course) {
+		throw new Error("Course not found");
+	}
+
+	const relatedCourses = await courseModel
+		.find({
+			category: course.category,
+			_id: { $ne: course._id },
+			is_deleted: false,
+		})
+		.select("title slug thumbnail price discount_price rating level")
+		.populate("category_id", "name slug")
+		.lean();
+
+	return relatedCourses;
+};

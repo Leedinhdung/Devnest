@@ -1,6 +1,4 @@
 import { CourseCard } from '@/components/client/course/CourseCard'
-import { Footer } from '@/components/client/footer/Footer'
-import { Navbar } from '@/components/client/navbar/Navbar'
 import { courses } from '@/data/mockData'
 import {
     ChevronDownIcon,
@@ -133,12 +131,6 @@ export function SearchResultsPage() {
                     return 0
             }
         })
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault()
-        setSearchParams({
-            q: searchInput,
-        })
-    }
     const clearFilters = () => {
         setSelectedLevel('Tất cả')
         setSelectedCategory('Tất cả')
@@ -155,57 +147,7 @@ export function SearchResultsPage() {
     }, [query])
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col mt-16">
-            <div className="bg-white border-b border-gray-200 py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl">
-                        <div className="flex-1 relative">
-                            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                placeholder="Tìm kiếm khóa học..."
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-gray-50"
-                            />
-                            {searchInput && (
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchInput('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    <XIcon className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
-                        <button
-                            type="submit"
-                            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-                        >
-                            Tìm kiếm
-                        </button>
-                    </form>
-
-                    {query && (
-                        <p className="mt-3 text-gray-600">
-                            {filteredCourses.length > 0 ? (
-                                <>
-                                    Tìm thấy{' '}
-                                    <span className="font-semibold text-gray-900">
-                                        {filteredCourses.length}
-                                    </span>{' '}
-                                    kết quả cho{' '}
-                                    <span className="font-semibold text-blue-600">"{query}"</span>
-                                </>
-                            ) : (
-                                <>
-                                    Không tìm thấy kết quả nào cho{' '}
-                                    <span className="font-semibold text-blue-600">"{query}"</span>
-                                </>
-                            )}
-                        </p>
-                    )}
-                </div>
-            </div>
+           
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
                 <div className="flex gap-8">
                     {/* Sidebar Filters - Desktop */}

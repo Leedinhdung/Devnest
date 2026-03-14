@@ -19,7 +19,7 @@ const routes = {
 	myFavorites: "/khoa-hoc-yeu-thich",
 	searchResult: "/khoa-hoc",
 	courseDetail: "/khoa-hoc/:slug",
-	buyCourse: "/mua-khoa-hoc/:id",
+	checkout: "/mua-khoa-hoc/:slug",
 	cart: "/gio-hang",
 };
 export default routes;

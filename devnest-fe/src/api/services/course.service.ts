@@ -16,6 +16,9 @@ export const courseApi = {
 	getCourseBySlug: async (slug: string): Promise<CourseResponse> => {
 		return axiosClient.get(courseUri.GET_COURSE_BY_SLUG(slug));
 	},
+	getRelatedCourses: async (slug: string): Promise<CourseResponse> => {
+		return axiosClient.get(courseUri.GET_RELATED_COURSES(slug));
+	},
 	updateCourse: async ({
 		slug,
 		...data
