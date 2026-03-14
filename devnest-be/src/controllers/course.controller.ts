@@ -3,6 +3,7 @@ import {
 	deleteCourseService,
 	getCourseBySlugService,
 	getCoursesService,
+	relatedCoursesService,
 	updateCourseService,
 } from "@/services/course.service.js";
 import { Request, Response } from "express";
@@ -82,5 +83,21 @@ export const deleteCourse = async (req: Request, res: Response) => {
 		});
 	} catch (error) {
 		res.status(500).json({ message: "Delete course failed", error });
+	}
+};
+export const getRelatedCourses = async (req: Request, res: Response) => {
+	try {
+		const { slug } = req.params;
+
+		const courses = await relatedCoursesService(slug);
+
+		return res.status(200).json(courses);
+	} catch (error) {
+		console.error(error);
+
+		return res.status(500).json({
+			success: false,
+			message: "Internal server error",
+		});
 	}
 };

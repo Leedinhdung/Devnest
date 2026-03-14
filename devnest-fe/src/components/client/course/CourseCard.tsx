@@ -14,13 +14,17 @@ interface CourseCardProps {
 }
 export function CourseCard({
     course,
-    showProgress = false,
     variant = 'default',
 }: CourseCardProps) {
-    console.log(course.slug)
+
     const discount = course.discount_price
         ? Math.round(((course.price - course.discount_price) / course.price) * 100)
         : 0
+    const levelMap: Record<string, string> = {
+        beginner: "Cơ bản",
+        intermediate: "Trung cấp",
+        advanced: "Nâng cao",
+    }
     if (variant === 'horizontal') {
         return (
             <motion.div
@@ -134,9 +138,11 @@ export function CourseCard({
                 <div className="flex flex-col flex-1 p-4">
                     <div className="flex items-center justify-between mb-2">
                         <CategoryBadge category={course.category_id?.name ?? "Khác"} size="sm" />
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {course.level}
-                        </span>
+                        {course.level && (
+                            <span className="text-xs text-gray-500 bg-primary-100 px-2 py-0.5 rounded-full">
+                                {levelMap[course.level] ?? course.level}
+                            </span>
+                        )}
                     </div>
 
                     <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors leading-snug mb-1">

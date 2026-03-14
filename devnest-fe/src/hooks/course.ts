@@ -28,6 +28,17 @@ export const useGetCourseBySlug = (
 		enabled: !!slug,
 	});
 };
+export const useGetRelatedCourses = (
+	slug: string,
+	options?: Omit<UseQueryOptions<CourseResponse>, "queryKey" | "queryFn">,
+) => {
+	return useQuery<CourseResponse>({
+		...options,
+		queryKey: ["relatedCourses", slug],
+		queryFn: () => courseApi.getRelatedCourses(slug),
+		enabled: !!slug,
+	});
+};
 export const useCreateCourse = () => {
 	const queryClient = useQueryClient();
 	return useMutation({

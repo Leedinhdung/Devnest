@@ -60,7 +60,7 @@ export const clientRoutes = [
 		layout: ClientLayout,
 		element: CourseDetailPage,
 	},
-	{ path: routes.buyCourse, layout: ClientLayout, element: CourseCheckoutPage },
+	{ path: routes.checkout, layout: ClientLayout, element: CourseCheckoutPage },
 	{ path: routes.cart, layout: ClientLayout, element: CartPage },
 ];
 export const learnRoutes = [
